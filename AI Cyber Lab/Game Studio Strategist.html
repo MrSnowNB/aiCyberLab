@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Game Studio Strategist Pro</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #E9ECEF; /* Light Gray Background */
+            color: #212529; /* Dark Gray Text */
+            font-size: 1rem; /* Base font size for Bootstrap compatibility */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px; /* Slightly narrower for a more focused feel */
+        }
+        .card-ui {
+            background-color: #FFFFFF;
+            border: none; /* Remove default border */
+            border-radius: 0.5rem; /* Softer corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        .game-header {
+            background-color: #007BFF; /* Primary Accent Blue */
+            color: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        .game-header h1 {
+            font-weight: 600;
+            font-size: 2rem; /* Adjusted for modern feel */
+            margin-bottom: 0.25rem;
+        }
+        .game-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .dashboard {
+            display: grid; /* Using grid for better control */
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Responsive columns */
+            gap: 1rem;
+            padding: 1rem; /* Reduced padding as it's inside a card */
+        }
+        .metric {
+            text-align: center;
+            padding: 0.75rem;
+            background-color: #F8F9FA; /* Light background for metrics */
+            border-radius: 0.375rem;
+        }
+        .metric .value {
+            font-size: 1.5rem; /* Larger value display */
+            font-weight: 600;
+            color: #007BFF; /* Accent color for value */
+            margin-bottom: 0.25rem;
+        }
+        .metric .label {
+            font-size: 0.8rem; /* Smaller label */
+            color: #6C757D; /* Muted text for label */
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .metric .label .icon {
+            font-size: 1em; /* Icons inherit size */
+            margin-right: 0.25rem;
+            opacity: 0.7;
+        }
+        .progress {
+            height: 0.5rem; /* Thinner progress bar */
+            margin-top: 0.5rem;
+            background-color: #DEE2E6; /* Lighter background for progress */
+            border-radius: 0.25rem;
+        }
+        .progress-bar {
+            background-color: #007BFF !important; /* Accent color */
+            border-radius: 0.25rem;
+            transition: width 0.6s ease;
+        }
+
+        .decision-prompt {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #343A40;
+            margin-bottom: 1rem;
+        }
+        .decision-options .btn, .summary-screen .btn, .studio-management-screen .btn {
+            margin-top: 0.75rem;
+            width: 100%;
+            text-align: left;
+            background-color: #FFFFFF;
+            color: #007BFF;
+            border: 1px solid #007BFF;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .decision-options .btn:hover, .summary-screen .btn:hover, .studio-management-screen .btn:hover {
+            background-color: #007BFF;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+         .decision-options .btn:disabled, .decision-options .btn.disabled,
+         .studio-management-screen .btn:disabled, .studio-management-screen .btn.disabled {
+            background-color: #E9ECEF;
+            color: #ADB5BD;
+            border-color: #DEE2E6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .tooltip-inner {
+            background-color: #212529; /* Dark tooltip */
+            color: #FFFFFF;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .tooltip.bs-tooltip-auto[x-placement^=bottom] .arrow::before,
+        .tooltip.bs-tooltip-bottom .arrow::before {
+            border-bottom-color: #212529;
+        }
+        .event-popup-content { /* Modal specific */
+            text-align: center;
+        }
+        .event-popup-content h4{
+            color: #DC3545; /* Red for event titles */
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .event-popup-content p {
+            font-size: 1rem;
+            color: #495057;
+        }
+        .section-title, .phase-title, .screen-title { /* Combined title style */
+            font-size: 1.5rem;
+            color: #007BFF;
+            border-bottom: 2px solid #DEE2E6; /* Lighter border */
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .game-over-title { color: #DC3545 !important; }
+        .grand-success-title { color: #28A745 !important; }
+
+        .svg-container {
+            width: 100%;
+            max-width: 150px; /* Can be larger for modern SVGs */
+            margin: 1rem auto 1.5rem auto; /* More spacing */
+        }
+        .svg-container svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .modal-content {
+            background-color: #FFFFFF;
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid #DEE2E6;
+            padding: 1rem 1.5rem;
+        }
+        .modal-footer{
+            border-top: 1px solid #DEE2E6;
+            padding: 1rem 1.5rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #343A40;
+        }
+        .close {
+            color: #000000;
+            opacity: 0.6;
+            font-size: 1.75rem;
+            text-shadow: none;
+        }
+        .close:hover {
+            opacity: 0.9;
+        }
+
+        /* Studio Management Specific */
+        .upgrade-item {
+            border: 1px solid #DEE2E6;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.375rem;
+            background-color: #F8F9FA;
+        }
+        .upgrade-item h5 {
+            color: #007BFF;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .upgrade-item p {
+            font-size: 0.9rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .upgrade-item .current-level {
+            font-weight: bold;
+            color: #28A745; /* Green for current level status */
+        }
+        #marketReport {
+            background-color: #FFF3CD; /* Bootstrap's warning yellow light */
+            border: 1px solid #FFEEBA;
+            color: #856404;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.375rem;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        #projectDecisionRecap, #gameOverProjectLog, #successProjectLog {
+            font-size: 0.9rem;
+            padding-left: 0; /* Remove default ul padding */
+        }
+        #projectDecisionRecap li, #gameOverProjectLog li, #successProjectLog li {
+            padding: 0.25rem 0;
+            color: #495057;
+            word-break: break-word;
+        }
+        #projectDecisionRecap li strong, #gameOverProjectLog li strong, #successProjectLog li strong {
+            color: #212529;
+        }
+        #projectMetrics p, #finalStudioStats p, #successStudioStats p {
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        #projectEducationalBlurb {
+            font-size: 0.95rem;
+            color: #495057;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #F8F9FA;
+            border-radius: 0.375rem;
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .game-header h1 { font-size: 1.75rem; }
+            .section-title, .phase-title, .screen-title { font-size: 1.3rem; }
+            .dashboard { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+            .metric .value { font-size: 1.3rem; }
+            .metric .label { font-size: 0.75rem; }
+            .svg-container { max-width: 120px; }
+        }
+
+        @media (max-width: 576px) {
+            body { font-size: 0.95rem; }
+            .card-ui { padding: 1rem; margin-bottom: 1rem;}
+            .game-header { padding: 1rem; }
+            .game-header h1 { font-size: 1.5rem; }
+            .dashboard { gap: 0.5rem; }
+            .metric { padding: 0.5rem; }
+            .decision-prompt { font-size: 1rem; }
+            .decision-options .btn, .summary-screen .btn, .studio-management-screen .btn { font-size: 0.9rem; padding: 0.6rem 0.8rem; }
+            .section-title, .phase-title, .screen-title { font-size: 1.2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; }
+            .svg-container { max-width: 100px; }
+            .modal-content { font-size: 0.9rem; }
+            .modal-title { font-size: 1.1rem; }
+            #projectEducationalBlurb, #projectMetrics p, #finalStudioStats p, #successStudioStats p { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-3 mt-md-4"> <!-- Adjusted top margin -->
+        <div class="game-header">
+            <h1>Game Studio Strategist</h1>
+            <p id="levelDisplay">Loading...</p>
+        </div>
+
+        <div id="studioImageContainer" class="svg-container">
+            <!-- General Studio SVG -->
+        </div>
+
+        <div id="dashboard" class="card-ui dashboard">
+            <!-- Dashboard metrics - these will be wrapped by .metric divs by JS -->
+        </div>
+
+        <div id="marketReport" class="card-ui" style="display:none;">
+            <!-- Market trend news -->
+        </div>
+
+        <div id="gameArea" style="display:none;">
+            <div id="phaseDisplay" class="mb-3"> <!-- Added margin -->
+                <h2 id="currentPhaseName" class="phase-title"></h2>
+            </div>
+            <div id="phaseImageContainer" class="svg-container mb-3">
+                <!-- Phase-specific SVG -->
+            </div>
+            <div id="decisionArea" class="card-ui decision-area">
+                <p id="decisionTitle" class="h5"></p> <!-- Bootstrap h5 for styling -->
+                <p id="decisionPrompt" class="decision-prompt"></p>
+                <div id="decisionOptions" class="decision-options"></div>
+            </div>
+        </div>
+
+        <div id="studioManagementScreen" class="card-ui studio-management-screen" style="display:none;">
+            <h2 class="screen-title">Studio Upgrades</h2>
+            <p class="text-center mb-4 text-secondary">Invest wisely to empower your studio for future endeavors.</p>
+            <div id="upgradesContainer">
+                <!-- Studio upgrades -->
+            </div>
+            <button id="proceedToNextProjectButton" class="btn btn-primary btn-block mt-4" onclick="startNewProjectActual()">Begin Next Project</button>
+        </div>
+
+        <div id="projectSummaryScreen" class="card-ui summary-screen" style="display:none;">
+            <h2 id="projectSummaryTitle" class="screen-title">Project Debrief</h2>
+            <div id="summaryChartContainer" class="svg-container mb-3">
+                <!-- Sales Chart SVG -->
+            </div>
+            <div id="projectMetrics"></div>
+            <h4 class="section-title" style="font-size: 1.2rem; margin-top: 1.5rem; text-align:left; border-bottom:none; color: #343A40;">Key Decisions & Outcomes:</h4>
+            <ul id="projectDecisionRecap" class="list-unstyled"></ul>
+            <div id="projectEducationalBlurb"></div> <!-- styled as a div -->
+            <button id="nextStepButton" class="btn btn-primary btn-block mt-4">Continue</button>
+        </div>
+
+        <div id="gameOverScreen" class="card-ui summary-screen" style="display:none;">
+            <h2 class="screen-title game-over-title">Game Over</h2>
+            <p id="gameOverReason" class="lead text-center"></p>
+            <h4 class="section-title" style="font-size: 1.2rem; margin-top: 1.5rem; text-align:left; border-bottom:none; color: #343A40;">Final Studio Report:</h4>
+            <div id="finalStudioStats"></div>
+            <h4 class="section-title" style="font-size: 1.2rem; margin-top: 1.5rem; text-align:left; border-bottom:none; color: #343A40;">Project History:</h4>
+            <ul id="gameOverProjectLog" class="list-unstyled"></ul>
+            <button class="btn btn-primary btn-block mt-4" onclick="restartGame()">Play Again</button>
+        </div>
+
+        <div id="grandSuccessScreen" class="card-ui summary-screen" style="display:none;">
+            <h2 class="screen-title grand-success-title">Grand Success!</h2>
+            <p class="lead text-center">Congratulations! You've built a world-renowned AAA game studio!</p>
+            <h4 class="section-title" style="font-size: 1.2rem; margin-top: 1.5rem; text-align:left; border-bottom:none; color: #343A40;">Final Studio Report:</h4>
+            <div id="successStudioStats"></div>
+            <h4 class="section-title" style="font-size: 1.2rem; margin-top: 1.5rem; text-align:left; border-bottom:none; color: #343A40;">Celebrated Projects:</h4>
+            <ul id="successProjectLog" class="list-unstyled"></ul>
+            <button class="btn btn-success btn-block mt-4" onclick="restartGame()">Play Again</button> <!-- Success button style -->
+        </div>
+    </div>
+
+    <!-- Modal for Random Events -->
+    <div class="modal fade" id="randomEventModal" tabindex="-1" role="dialog" aria-labelledby="randomEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="randomEventModalLabel">Unexpected Event!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body event-popup-content">
+                    <div id="eventIconContainer" class="mb-3" style="font-size: 3rem; color: #007BFF;"></div>
+                    <h4 id="randomEventName"></h4>
+                    <p id="randomEventDescription"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Acknowledge</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // --- MODERN SVG Graphics ---
+        const SVGIcons = {
+            studio: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 90V40L50 10L90 40V90H65V60H35V90H10Z" stroke="#007BFF" stroke-width="5" fill="#007BFF" fill-opacity="0.1"/><rect x="40" y="70" width="20" height="20" fill="#007BFF" fill-opacity="0.3"/><rect x="25" y="45" width="15" height="15" fill="#007BFF" fill-opacity="0.3"/><rect x="60" y="45" width="15" height="15" fill="#007BFF" fill-opacity="0.3"/></svg>`,
+            pre_production: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="20" width="70" height="60" rx="5" stroke="#007BFF" stroke-width="4" fill="#007BFF" fill-opacity="0.1"/><path d="M30 35H70" stroke="#007BFF" stroke-width="3" stroke-linecap="round"/><path d="M30 45H70" stroke="#007BFF" stroke-width="3" stroke-linecap="round"/><path d="M30 55H55" stroke="#007BFF" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="15" r="8" fill="#FFC107"/><path d="M50 23V30L45 27L50 30L55 27L50 30" stroke="#FFC107" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`, // Document with lightbulb idea
+            development: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="20" width="80" height="55" rx="5" stroke="#007BFF" stroke-width="4" fill="#007BFF" fill-opacity="0.05"/><path d="M25 35L40 45L25 55" stroke="#28A745" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 60H75" stroke="#6C757D" stroke-width="4" stroke-linecap="round"/><rect x="12" y="78" width="76" height="10" rx="3" fill="#6C757D" fill-opacity="0.3"/></svg>`, // Monitor with code-like symbols
+            launch: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 90C50 90 70 70 70 50C70 30 50 10 50 10C50 10 30 30 30 50C30 70 50 90 50 90Z" stroke="#007BFF" stroke-width="5" fill="#007BFF" fill-opacity="0.2"/><path d="M50 60L50 20" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/><path d="M40 30L50 20L60 30" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="50" cy="90" rx="20" ry="8" fill="#FFC107" fill-opacity="0.5"/><ellipse cx="50" cy="90" rx="10" ry="4" fill="#E0A800"/></svg>`, // Sleek rocket
+            post_launch: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="60" width="15" height="30" fill="#007BFF" fill-opacity="0.7"/><rect x="42" y="40" width="15" height="50" fill="#28A745" fill-opacity="0.7"/><rect x="64" y="20" width="15" height="70" fill="#FFC107" fill-opacity="0.7"/><line x1="10" y1="90" x2="90" y2="90" stroke="#6C757D" stroke-width="3"/></svg>`, // Bar chart
+            bug: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#DC3545" fill-opacity="0.1" stroke="#DC3545" stroke-width="4"/><path d="M50 30V55M50 65V70" stroke="#DC3545" stroke-width="8" stroke-linecap="round"/></svg>`, // Exclamation in circle
+            money_bag: `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="30" width="70" height="45" rx="8" stroke="#28A745" stroke-width="4" fill="#28A745" fill-opacity="0.1"/><path d="M50 40C55 40 60 45 60 50C60 55 55 60 50 60C45 60 40 55 40 50C40 45 45 40 50 40Z" stroke="#28A745" stroke-width="3"/><path d="M50 30V20M40 25H60" stroke="#28A745" stroke-width="3" stroke-linecap="round"/></svg>`, // Wallet/Card icon
+            default_event: `<span>&#9737;</span>`, // Question mark cloud (using unicode for simplicity here)
+            viral_hit: `<span>&#128640;</span>`, // Rocket emoji
+            competitor: `<span>&#9876;</span>`, // Crossed swords emoji
+            tech_breakthrough: `<span>&#128161;</span>`, // Lightbulb emoji
+            employee_departure: `<span>&#128694;</span>` // Person walking emoji
+        };
+        // Using simple text/emoji for some event icons to simplify, can be replaced with full SVGs.
+
+        // --- Game State & Data (Largely Unchanged) ---
+        let studioState = {};
+        let projectState = {};
+        let marketTrends = { hotGenre: null, coldGenre: null };
+
+        const initialStudioState = {
+            companyFunds: 250, currentLevel: 0, maxLevels: 3, studioReputation: 50, gameLog: [],
+            rndLevel: 0, marketingLevel: 0, hrLevel: 0, qaLevel: 0,
+            companyFundsAtStartOfProject: 250
+        };
+        const initialPerProjectGameState = {
+            currentPhaseIndex: 0, currentDecisionIndex: 0, baseDevelopmentCost: 0, accumulatedCosts: 0,
+            gameQuality: 50, teamMorale: 50, marketReception: 50,
+            timeModifierMonths: 0, developmentTimeYears: 3, selectedGenre: null, riskPercent: 0,
+            platformSalesMultiplier: 1.0, dlcSalesMultiplier: 1.0, chosenDecisionsLog: []
+        };
+
+        const MIN_FUNDS_FOR_LOW_BUDGET_PROJECT = 100;
+        const MIN_REPUTATION_GAME_OVER = 10;
+        const MIN_GAME_QUALITY_GAME_OVER = 20;
+        const MAX_UPGRADE_LEVEL = 3;
+
+        const STUDIO_UPGRADES = [
+            { id: 'rnd', name: 'R&D Innovation Hub', costs: [50, 100, 150], description: "Boosts core game quality and unlocks potential for tech breakthroughs.", bonusPerLevel: { gameQuality: 2 } },
+            { id: 'marketing', name: 'Global Marketing Suite', costs: [40, 80, 120], description: "Enhances market reception and effectiveness of promotional activities.", bonusPerLevel: { marketReception: 2 } },
+            { id: 'hr', name: 'Talent Development Center', costs: [30, 60, 90], description: "Improves team morale and mitigates negative impacts from crunch or setbacks.", bonusPerLevel: { teamMorale: 2 } },
+            { id: 'qa', name: 'Quality Assurance Lab', costs: [35, 70, 105], description: "Reduces bugs, improves final polish, and lowers project risks.", bonusPerLevel: { gameQuality: 1, riskReduction: 0.02 } }
+        ];
+        const GENRES = ["Action-Adventure", "FPS", "RPG", "Simulation", "Strategy", "Puzzle", "Indie Darling", "Sports Sim"];
+
+        const PHASES_DATA = [ // Content mostly same, tooltips slightly rephrased for professionalism
+             { name: "Phase 1: Pre-production & Concept", svgIcon: SVGIcons.pre_production, decisions: [
+                { id: "set_initial_budget", title: "Define Project Investment", prompt: "Allocate initial capital for this title. This sets the scale and resource availability.", options: [ { text: "Seed Funding ($100M)", value: 100, consequences: { gameQuality: -15 }, tooltip: "A conservative start. Lower potential returns but mitigates financial exposure." }, { text: "Series A Funding ($200M)", value: 200, consequences: { }, tooltip: "Standard industry investment for a significant title." }, { text: "Blockbuster Backing ($300M)", value: 300, consequences: { gameQuality: +15, riskPercent: +20 }, tooltip: "High-stakes investment for a flagship product. Expects top-tier results." }]},
+                { id: "choose_genre", title: "Select Target Genre", prompt: "Determine the game's genre. Analyze market viability and studio expertise.", options: [ /* Populated by JS */ ]},
+                { id: "hire_personnel", title: "Assemble Core Leadership", prompt: "Recruit key talent to lead critical aspects of development.", options: [ { text: "Chief Creative Officer (+$10M)", consequences: { gameQuality: +15, cost: 10 }, tooltip: "Oversees game design, narrative, and artistic vision." }, { text: "Lead Technical Architect (+$8M)", consequences: { gameQuality: +10, cost: 8 }, tooltip: "Manages engine development, performance, and technical pipeline." }, { text: "Art Director (+$12M)", consequences: { marketReception: +10, cost: 12 }, tooltip: "Defines visual style and ensures high-quality art production." }]}
+            ]},
+            { name: "Phase 2: Active Development", svgIcon: SVGIcons.development, decisions: [
+                { id: "work_schedule", title: "Set Development Pace", prompt: "Manage team workload and project timelines. Balance speed with sustainability.", options: [ { text: "Standard Operations", consequences: { teamMorale: +10 }, tooltip: "Sustainable workflow, promotes team well-being." }, { text: "Accelerated Timeline ('Crunch')", consequences: { timeModifierMonths: -6, teamMorale: -20, gameQuality: +5 }, tooltip: "Intensive work periods to meet deadlines. High morale cost, some quality gain." }, { text: "Strategic Off-site (+$5M, +3 Months)", consequences: { teamMorale: +20, timeModifierMonths: +3, cost: 5 }, tooltip: "Invest in team cohesion and creative refresh. Adds cost and time." }]},
+                { id: "tech_choice", title: "Technology Stack", prompt: "Choose the foundational game engine and core technologies.", options: [ { text: "Utilize Proven Engine", consequences: {}, tooltip: "Leverage stable, well-documented technology." }, { text: "Adopt Cutting-Edge Tech", consequences: { gameQuality: 'random_tech' }, tooltip: "High risk, high reward. Potential for innovation or significant setbacks (50/50 for +/-20 Quality)." }, { text: "Develop Proprietary Engine (+$50M)", consequences: { gameQuality: +25, cost: 50, timeModifierMonths: +6 }, tooltip: "Full control and customization. Significant R&D investment and time." }]},
+                { id: "scope_management", title: "Manage Project Scope", prompt: "Address evolving project requirements and feature requests.", options: [ { text: "Expand Scope (New Features) (+$20M, +6 Months)", consequences: { gameQuality: +15, timeModifierMonths: +6, cost: 20 }, tooltip: "Incorporate additional features. Enhances product but increases budget and timeline." }, { text: "Maintain Current Scope", consequences: {}, tooltip: "Adhere to original plan. Prioritizes budget and schedule." }, { text: "Streamline Scope (Cut Features) (-$5M, -6 Months)", consequences: { timeModifierMonths: -6, gameQuality: -15, cost: -5 }, tooltip: "Reduce scope to meet constraints. Sacrifices features for efficiency." }]}
+            ]},
+            { name: "Phase 3: Launch & Marketing", svgIcon: SVGIcons.launch, decisions: [
+                { id: "marketing_budget", title: "Allocate Marketing Capital", prompt: "Determine marketing investment as a percentage of base development cost.", options: [ { text: "Targeted Campaign (10%)", consequences: { marketReception: -10, marketingCostPercentage: 0.10 }, tooltip: "Focused, cost-effective promotion. Limited overall reach." }, { text: "Comprehensive Campaign (20%)", consequences: { marketingCostPercentage: 0.20 }, tooltip: "Standard industry-wide marketing push." }, { text: "Global Blitz Campaign (30%)", consequences: { marketReception: +15, marketingCostPercentage: 0.30 }, tooltip: "Maximum visibility through aggressive, widespread promotion. High expenditure." }]},
+                { id: "release_timing", title: "Finalize Release Date", prompt: "Strategic release timing can impact market reception and final polish.", options: [ { text: "Launch As Scheduled", consequences: {}, tooltip: "Proceed with the planned release date." }, { text: "Strategic Delay (6 Months, +$15M)", consequences: { gameQuality: +10, marketReception: -5, timeModifierMonths: +6, cost: 15 }, tooltip: "Additional polish and bug-fixing. Incurs costs and market may shift." }, { text: "Expedited Release (-3 Months)", consequences: { timeModifierMonths: -3, gameQuality: -20, marketReception: -5 }, tooltip: "Meet an earlier market window. Risks lower quality and bugs." }]},
+                { id: "platform_selection", title: "Select Target Platforms", prompt: "Choose distribution platforms. Consider audience reach and development overhead.", options: [ { text: "Console Partnership (Exclusive)", consequences: { marketReception: +10, platformSalesMultiplier: 0.85, cost: 0 }, tooltip: "Platform holder marketing support, focused audience, but limited market size." }, { text: "Multi-Platform Release (+$20M)", consequences: { platformSalesMultiplier: 1.2, cost: 20 }, tooltip: "Maximize audience reach. Higher porting and optimization costs." }, { text: "PC Focus (-$10M)", consequences: { cost: -10, marketReception: -10, platformSalesMultiplier: 0.9 }, tooltip: "Targets dedicated PC gaming community. Lower platform fees, potentially smaller mass market." }]}
+            ]},
+            { name: "Phase 4: Post-Launch Support", svgIcon: SVGIcons.post_launch, decisions: [
+                { id: "respond_reviews", title: "Address Market Feedback", prompt: "Manage player and critic reviews post-launch. This shapes long-term sentiment.", options: [ { text: "Proactive Patching & Support (+$5M)", consequences: { marketReception: +10, cost: 5, studioReputation: +3, gameQuality: +5 }, tooltip: "Actively improve based on feedback. Builds strong community relations." }, { text: "Minimal Viable Support", consequences: { marketReception: -15, studioReputation: -10 }, tooltip: "Basic support only. May lead to player dissatisfaction." }, { text: "Public Relations Initiative", consequences: { marketReception: 'random_pr', studioReputation: 'random_pr_rep' }, tooltip: "Direct community engagement. Outcomes vary (60/40 for +/-5 Reception, +/-2 Rep)." }]},
+                { id: "dlc_strategy", title: "Post-Launch Content Strategy", prompt: "Plan for additional content to extend product lifecycle and revenue.", options: [ { text: "Free Value-Add Updates (+$10M)", consequences: { marketReception: +15, cost: 10, studioReputation: +5 }, tooltip: "Enhance player loyalty and game longevity with free content." }, { text: "Premium Expansion Packs (+$15M Dev)", consequences: { dlcSalesMultiplier: 1.2, marketReception: -5, cost: 15, studioReputation: -2 }, tooltip: "Generate new revenue streams. Adds development cost and can impact perception if not valuable." }, { text: "Transition to Next Project", consequences: { marketReception: -20, studioReputation: -5 }, tooltip: "Focus resources on new titles. Game lifecycle ends sooner." }]},
+                { id: "community_engagement", title: "Community Management Investment", prompt: "Foster and manage your player community and online presence.", options: [ { text: "Dedicated Community Team (+$8M)", consequences: { marketReception: +10, cost: 8, studioReputation: +4 }, tooltip: "Invest in professional community management for direct engagement." }, { text: "Standard Forum Moderation", consequences: {}, tooltip: "Basic online presence and support." }, { text: "Influencer Collaboration Program (+$10M)", consequences: { marketReception: 'random_influencer', cost: 10 }, tooltip: "Leverage influencers for promotion. High impact variance (60/40 for +20/-10 Reception)." }]}
+            ]}
+        ];
+        const RANDOM_EVENTS = [ /* Content of events same, but icons will be text/emoji */
+            { name: "Tech Advancement!", icon: SVGIcons.tech_breakthrough, description: "R&D breakthrough improves efficiency!", effect: (projS, studS) => { let costReduction = Math.round(projS.accumulatedCosts * (0.05 + (studS.rndLevel * 0.02))); projS.accumulatedCosts -= costReduction; studS.companyFunds += costReduction; projS.gameQuality += (5 + studS.rndLevel); return `Costs reduced by $${costReduction}M. Quality +${5 + studS.rndLevel}.`; } },
+            { name: "Key Talent Poached", icon: SVGIcons.employee_departure, description: "A competitor hired away a key team member!", effect: (projS, studS) => { let moraleHit = 20 - (studS.hrLevel * 3); projS.teamMorale -= moraleHit; projS.gameQuality -= (5 - studS.hrLevel); studS.studioReputation -=2; return `Morale -${moraleHit}, Quality -${5-studS.hrLevel}, Studio Rep -2.`; } },
+            { name: "Market Disruption", icon: SVGIcons.competitor, description: "A rival studio launched a similar, acclaimed title!", effect: (projS, studS) => { if (projS.selectedGenre) projS.marketReception -= (10 - studS.marketingLevel); return `Market Reception for your genre potentially -${10 - studS.marketingLevel}.`; } },
+            { name: "Viral Sensation!", icon: SVGIcons.viral_hit, description: "Marketing content unexpectedly went viral!", effect: (projS, studS) => { projS.marketReception += (15 + studS.marketingLevel * 2); studS.studioReputation +=2; return `Market Reception +${15 + studS.marketingLevel * 2}. Studio Rep +2.`; } },
+            { name: "Pre-Launch Hiccups", icon: SVGIcons.bug, description: "Beta testing revealed unexpected technical issues.", effect: (projS, studS) => { projS.gameQuality -= (10 - studS.qaLevel * 2); let fixCost = 10 - studS.qaLevel; projS.accumulatedCosts += fixCost; studS.companyFunds -= fixCost; return `Quality -${10 - studS.qaLevel * 2}. Urgent fixes cost $${fixCost}M.`; } },
+        ];
+
+
+        // --- Game Logic Functions (mostly unchanged, UI update calls will reflect new structure) ---
+        function restartGame() {
+            $('#randomEventModal').modal('hide');
+            studioState = JSON.parse(JSON.stringify(initialStudioState));
+            document.getElementById('studioImageContainer').innerHTML = SVGIcons.studio;
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('projectSummaryScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('grandSuccessScreen').style.display = 'none';
+            document.getElementById('studioManagementScreen').style.display = 'none';
+            document.getElementById('marketReport').style.display = 'none';
+
+            if (studioState.currentLevel === 0) {
+                startNewProjectActual();
+            } else {
+                displayStudioManagementScreen(); // This flow remains
+            }
+        }
+
+        function displayStudioManagementScreen() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('projectSummaryScreen').style.display = 'none';
+            document.getElementById('studioManagementScreen').style.display = 'block';
+            updateDashboard();
+
+            const upgradesContainer = document.getElementById('upgradesContainer');
+            upgradesContainer.innerHTML = '';
+
+            STUDIO_UPGRADES.forEach(upgrade => {
+                const currentLevel = studioState[upgrade.id + 'Level'];
+                let buttonText = "Invest in Level 1";
+                let cost = 0;
+                let canAfford = false;
+                let isMaxLevel = false;
+
+                if (currentLevel < MAX_UPGRADE_LEVEL) {
+                    cost = upgrade.costs[currentLevel];
+                    buttonText = `Upgrade to Level ${currentLevel + 1} <span class="badge badge-pill badge-light ml-2">$${cost}M</span>`;
+                    canAfford = studioState.companyFunds >= cost;
+                } else {
+                    buttonText = "Max Level Achieved";
+                    isMaxLevel = true;
+                }
+
+                const effects = Object.entries(upgrade.bonusPerLevel)
+                    .map(([key, val]) => `${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: +${val} per level`)
+                    .join(', ');
+
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.className = 'upgrade-item';
+                upgradeDiv.innerHTML = `
+                    <h5>${upgrade.name} <span class="current-level badge badge-success">Level ${currentLevel}</span></h5>
+                    <p>${upgrade.description}</p>
+                    <p><em>Strategic Benefits: ${effects}</em></p>
+                    <button class="btn btn-outline-primary btn-sm" onclick="purchaseUpgrade('${upgrade.id}')" ${isMaxLevel || !canAfford ? 'disabled' : ''}>${buttonText}</button>
+                `;
+                upgradesContainer.appendChild(upgradeDiv);
+            });
+             $('[data-toggle="tooltip"]').tooltip('dispose');
+             $('[data-toggle="tooltip"]').tooltip();
+        }
+
+        function purchaseUpgrade(upgradeId) {
+            const upgradeData = STUDIO_UPGRADES.find(u => u.id === upgradeId);
+            const currentLevelProp = upgradeId + 'Level';
+            const currentLevel = studioState[currentLevelProp];
+
+            if (currentLevel < MAX_UPGRADE_LEVEL) {
+                const cost = upgradeData.costs[currentLevel];
+                if (studioState.companyFunds >= cost) {
+                    studioState.companyFunds -= cost;
+                    studioState[currentLevelProp]++;
+                    displayStudioManagementScreen();
+                } else {
+                     $('#randomEventModal').modal('hide'); // Ensure no other modal is open
+                     showRandomEventModal("Insufficient Capital", `You need $${cost}M to purchase this upgrade. Current funds: $${studioState.companyFunds}M.`, `<span>&#128178;</span>`); // Money bag with cross / sad face
+                }
+            }
+        }
+
+        function populateGenreOptions() {
+            const genreDecision = PHASES_DATA[0].decisions.find(d => d.id === 'choose_genre');
+            genreDecision.options = [];
+            GENRES.forEach(genre => {
+                let marketMod = 0;
+                let tooltipSuffix = "";
+                if (genre === marketTrends.hotGenre) {
+                    marketMod = 15;
+                    tooltipSuffix = " (Strong Market Demand)";
+                } else if (genre === marketTrends.coldGenre) {
+                    marketMod = -15;
+                    tooltipSuffix = " (Saturated or Niche Market)";
+                }
+
+                let baseConsequences = {};
+                if (genre === "RPG" || genre === "Strategy") baseConsequences = { timeModifierMonths: +6, cost: 10 };
+                else if (genre === "FPS" || genre === "Sports Sim") baseConsequences = { cost: 5 };
+                else if (genre === "Simulation" || genre === "Puzzle" || genre === "Indie Darling") baseConsequences = { marketReception: -5, cost: -5 };
+
+                genreDecision.options.push({
+                    text: genre,
+                    consequences: { ...baseConsequences, marketReception: (baseConsequences.marketReception || 0) + marketMod, selectedGenre: true },
+                    tooltip: `Develop a ${genre} title.${tooltipSuffix} Consider potential development time and cost implications.`
+                });
+            });
+        }
+
+        function determineMarketTrends() {
+            let availableGenres = [...GENRES];
+            const hotIndex = Math.floor(Math.random() * availableGenres.length);
+            marketTrends.hotGenre = availableGenres[hotIndex];
+            availableGenres.splice(hotIndex, 1);
+            const coldIndex = Math.floor(Math.random() * availableGenres.length);
+            marketTrends.coldGenre = availableGenres[coldIndex];
+
+            const reportEl = document.getElementById('marketReport');
+            reportEl.innerHTML = `<strong>Market Intelligence:</strong> <span class="text-success">📈 ${marketTrends.hotGenre}</span> titles show strong potential. <span class="text-danger">📉 ${marketTrends.coldGenre}</span> market appears challenging.`;
+            reportEl.style.display = 'block';
+        }
+
+
+        function startNewProjectActual() {
+            studioState.currentLevel++;
+            if (studioState.currentLevel > studioState.maxLevels && studioState.maxLevels > 0) {
+                grandSuccess();
+                return;
+            }
+            projectState = JSON.parse(JSON.stringify(initialPerProjectGameState));
+            studioState.companyFundsAtStartOfProject = studioState.companyFunds;
+
+            projectState.gameQuality += studioState.rndLevel * STUDIO_UPGRADES.find(u=>u.id==='rnd').bonusPerLevel.gameQuality;
+            projectState.gameQuality += studioState.qaLevel * STUDIO_UPGRADES.find(u=>u.id==='qa').bonusPerLevel.gameQuality;
+            projectState.marketReception += studioState.marketingLevel * STUDIO_UPGRADES.find(u=>u.id==='marketing').bonusPerLevel.marketReception;
+            projectState.teamMorale += studioState.hrLevel * STUDIO_UPGRADES.find(u=>u.id==='hr').bonusPerLevel.teamMorale;
+
+            projectState.gameQuality = Math.max(0, Math.min(100, projectState.gameQuality));
+            projectState.marketReception = Math.max(0, Math.min(100, projectState.marketReception));
+            projectState.teamMorale = Math.max(0, Math.min(100, projectState.teamMorale));
+
+            document.getElementById('levelDisplay').textContent = `Project Cycle ${studioState.currentLevel} of ${studioState.maxLevels}`;
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('studioManagementScreen').style.display = 'none';
+            document.getElementById('projectSummaryScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('grandSuccessScreen').style.display = 'none';
+
+            determineMarketTrends();
+            populateGenreOptions();
+
+            const lowestBudgetOption = PHASES_DATA[0].decisions.find(d => d.id === 'set_initial_budget').options[0].value;
+            if (studioState.companyFunds < lowestBudgetOption) {
+                gameOver("Capital Shortfall", `Insufficient funds ($${studioState.companyFunds}M) to initiate project (min $${lowestBudgetOption}M). Strategic financial planning is essential.`);
+                return;
+            }
+            updateDashboard();
+            displayNextDecision();
+        }
+
+
+        function updateDashboard() {
+            const dashboardEl = document.getElementById('dashboard');
+            const fundsProgress = studioState.companyFundsAtStartOfProject > 0 ? Math.max(0, Math.min(100, (studioState.companyFunds / studioState.companyFundsAtStartOfProject) * 100)) : (studioState.companyFunds > 0 ? 100 : 0);
+
+            dashboardEl.innerHTML = `
+                <div class="metric">
+                    <div class="label"><span class="icon">&#128176;</span>Capital</div>
+                    <div class="value">$${studioState.companyFunds}M</div>
+                    <div class="progress"><div class="progress-bar" role="progressbar" style="width: ${fundsProgress}%" ></div></div>
+                </div>
+                <div class="metric">
+                    <div class="label"><span class="icon">&#11088;</span>Quality</div>
+                    <div class="value">${projectState.gameQuality}</div>
+                    <div class="progress"><div class="progress-bar" role="progressbar" style="width: ${projectState.gameQuality}%"></div></div>
+                </div>
+                <div class="metric">
+                    <div class="label"><span class="icon">&#128170;</span>Morale</div>
+                    <div class="value">${projectState.teamMorale}</div>
+                    <div class="progress"><div class="progress-bar" role="progressbar" style="width: ${projectState.teamMorale}%"></div></div>
+                </div>
+                <div class="metric">
+                    <div class="label"><span class="icon">&#128200;</span>Market Fit</div>
+                    <div class="value">${projectState.marketReception}</div>
+                    <div class="progress"><div class="progress-bar" role="progressbar" style="width: ${projectState.marketReception}%"></div></div>
+                </div>
+                <div class="metric">
+                    <div class="label"><span class="icon">&#127941;</span>Reputation</div>
+                    <div class="value">${studioState.studioReputation}</div>
+                    <div class="progress"><div class="progress-bar" role="progressbar" style="width: ${studioState.studioReputation}%"></div></div>
+                </div>`;
+        }
+
+        function displayNextDecision() {
+            if (studioState.companyFunds < 0) { gameOver("Insolvency", `Studio operations ceased due to negative capital ($${studioState.companyFunds}M).`); return; }
+
+            const phase = PHASES_DATA[projectState.currentPhaseIndex];
+            document.getElementById('currentPhaseName').textContent = phase.name;
+            document.getElementById('phaseImageContainer').innerHTML = phase.svgIcon || "";
+
+            if (projectState.currentDecisionIndex >= phase.decisions.length) {
+                moveToNextPhase();
+                return;
+            }
+
+            const decision = phase.decisions[projectState.currentDecisionIndex];
+            document.getElementById('decisionTitle').textContent = decision.title;
+            document.getElementById('decisionPrompt').textContent = decision.prompt;
+            const optionsEl = document.getElementById('decisionOptions');
+            optionsEl.innerHTML = '';
+
+            decision.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn'; // Base class, specific styling in CSS
+                btn.innerHTML = opt.text; // Use innerHTML for badges if any
+                btn.setAttribute('data-toggle', 'tooltip');
+                btn.setAttribute('data-placement', 'right');
+                btn.setAttribute('title', opt.tooltip);
+                btn.onclick = () => handleDecision(decision, opt);
+
+                if (decision.id === "set_initial_budget" && studioState.companyFunds < opt.value) {
+                    btn.disabled = true;
+                    btn.title = `${opt.tooltip} (Insufficient Capital: Requires $${opt.value}M, Available: $${studioState.companyFunds}M)`;
+                    btn.classList.add('disabled');
+                }
+                optionsEl.appendChild(btn);
+            });
+            $('[data-toggle="tooltip"]').tooltip('dispose');
+            $('[data-toggle="tooltip"]').tooltip();
+        }
+
+        function applyCost(costAmount, decisionId = "") {
+            if (decisionId === "set_initial_budget") {
+                projectState.baseDevelopmentCost = costAmount;
+            }
+            projectState.accumulatedCosts += costAmount;
+            studioState.companyFunds -= costAmount;
+
+            if (studioState.companyFunds < 0) {
+                updateDashboard();
+                gameOver("Insolvency", `Expenditure of $${costAmount}M resulted in negative capital ($${studioState.companyFunds}M). Operations cannot continue.`);
+                return true;
+            }
+            return false;
+        }
+
+       function handleDecision(decision, option) {
+            let consequencesDescription = [];
+            const cons = option.consequences;
+
+            if (decision.id === "set_initial_budget") {
+                if (applyCost(option.value, decision.id)) return;
+                consequencesDescription.push(`Initial project investment: $${option.value}M`);
+            }
+
+            for (const key in cons) {
+                let value = cons[key];
+                let changeDescription = "";
+
+                if (key === 'cost') {
+                    if (applyCost(value)) return;
+                    changeDescription = `Operational Cost: $${value}M (Capital ${value < 0 ? 'increase' : 'decrease'}: $${Math.abs(value)}M)`;
+                } else if (key === 'marketingCostPercentage') {
+                    const marketingCost = Math.round(projectState.baseDevelopmentCost * value);
+                    if (applyCost(marketingCost)) return;
+                    changeDescription = `Marketing Investment: $${marketingCost}M (${value*100}% of $${projectState.baseDevelopmentCost}M base)`;
+                } else if (['gameQuality', 'teamMorale', 'marketReception', 'riskPercent'].includes(key)) {
+                    if (typeof value === 'string' && value.startsWith('random_')) {
+                        if (value === 'random_tech') {
+                            let techRiskModifier = studioState.qaLevel * STUDIO_UPGRADES.find(u=>u.id==='qa').bonusPerLevel.riskReduction;
+                            if (Math.random() < (0.5 - techRiskModifier)) {
+                                projectState.gameQuality += 20;
+                                changeDescription = "Product Quality: +20 (Tech innovation successful)";
+                            } else {
+                                projectState.gameQuality -= (20 - studioState.qaLevel * 2);
+                                changeDescription = `Product Quality: -${(20 - studioState.qaLevel * 2)} (Tech integration unstable)`;
+                            }
+                        }
+                    } else {
+                        if (decision.id === "work_schedule" && option.text.includes("Accelerated") && key === "teamMorale") {
+                             value += studioState.hrLevel * 2;
+                             changeDescription = `Team Morale: ${value >= 0 ? '+' : ''}${value} (Accelerated timeline impact adjusted by HR)`;
+                        } else {
+                            projectState[key] = (projectState[key] || 0) + value;
+                            changeDescription = `${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${value >= 0 ? '+' : ''}${value}`;
+                        }
+                    }
+                } else if (key === 'studioReputation') {
+                     if (typeof value === 'string' && value.startsWith('random_')) {
+                         if (value === 'random_pr_rep') {
+                            if (projectState.marketReception_last_random_pr_outcome > 0) { studioState.studioReputation += (2 + Math.floor(studioState.marketingLevel / 2)); changeDescription = `Studio Reputation: +${(2 + Math.floor(studioState.marketingLevel / 2))} (Positive PR outcome)`;}
+                            else { studioState.studioReputation -= (2 - Math.floor(studioState.marketingLevel / 2)); changeDescription = `Studio Reputation: -${(2 - Math.floor(studioState.marketingLevel / 2))} (Negative PR outcome)`;}
+                         }
+                     } else {
+                        studioState.studioReputation += value;
+                        changeDescription = `Studio Reputation: ${value >= 0 ? '+' : ''}${value}`;
+                     }
+                } else if (key === 'marketReception' && typeof value === 'string' && value.startsWith('random_')) {
+                     if (value === 'random_pr') {
+                        let outcome = (Math.random() < (0.6 + studioState.marketingLevel * 0.05)) ? (5 + studioState.marketingLevel) : -(5 - studioState.marketingLevel);
+                        projectState.marketReception += outcome;
+                        projectState.marketReception_last_random_pr_outcome = outcome;
+                        changeDescription = `Market Reception: ${outcome > 0 ? '+' : ''}${outcome} (PR Initiative ${outcome > 0 ? 'successful' : 'mismanaged'})`;
+                    } else if (value === 'random_influencer') {
+                        let outcome = (Math.random() < (0.6 + studioState.marketingLevel * 0.05)) ? (20 + studioState.marketingLevel*2) : -(10 - studioState.marketingLevel);
+                        projectState.marketReception += outcome;
+                        changeDescription = `Market Reception: ${outcome > 0 ? '+' : ''}${outcome} (Influencer Program ${outcome > 0 ? 'success' : 'failure'})`;
+                    }
+                } else if (key === 'platformSalesMultiplier' || key === 'dlcSalesMultiplier') {
+                    projectState[key] = value;
+                    changeDescription = `${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} Factor: x${value}`;
+                } else if (key === 'timeModifierMonths') {
+                    projectState.timeModifierMonths += value;
+                    changeDescription = `Development Timeline adjusted by: ${value >= 0 ? '+' : ''}${value} months`;
+                } else if (key === 'selectedGenre') {
+                    projectState.selectedGenre = option.text;
+                    changeDescription = `Target Genre Confirmed: ${projectState.selectedGenre}`;
+                }
+                if(changeDescription) consequencesDescription.push(changeDescription);
+            }
+
+            projectState.gameQuality = Math.max(0, Math.min(100, projectState.gameQuality));
+            projectState.teamMorale = Math.max(0, Math.min(100, projectState.teamMorale));
+            projectState.marketReception = Math.max(0, Math.min(100, projectState.marketReception));
+            studioState.studioReputation = Math.max(0, Math.min(100, studioState.studioReputation));
+
+            projectState.chosenDecisionsLog.push({ decision: decision.title, option: option.text, consequences: consequencesDescription.join('; ') || "Strategic choice with indirect impact."});
+
+            projectState.currentDecisionIndex++;
+            updateDashboard();
+
+            if (studioState.companyFunds < 0) { return; }
+
+            triggerRandomEvent();
+            if (studioState.companyFunds >= 0) {
+                 displayNextDecision();
+            }
+        }
+
+        function moveToNextPhase() {
+            projectState.currentPhaseIndex++;
+            projectState.currentDecisionIndex = 0;
+            if (projectState.currentPhaseIndex >= PHASES_DATA.length) {
+                endProject();
+            } else {
+                displayNextDecision();
+            }
+        }
+
+        function triggerRandomEvent() {
+            let budgetOverrunRisk = projectState.riskPercent / 100;
+            budgetOverrunRisk -= studioState.qaLevel * STUDIO_UPGRADES.find(u=>u.id==='qa').bonusPerLevel.riskReduction;
+            budgetOverrunRisk = Math.max(0, budgetOverrunRisk);
+
+            if (budgetOverrunRisk > 0 && projectState.currentPhaseIndex === 1) {
+                if (Math.random() < budgetOverrunRisk) {
+                    const overrunCost = Math.round(projectState.baseDevelopmentCost * (0.15 - studioState.qaLevel * 0.03));
+                    showRandomEventModal("Budget Overrun", `Unforeseen complexities led to an additional expenditure of $${overrunCost}M. QA oversight helped mitigate further escalation.`, SVGIcons.bug);
+                    if(applyCost(overrunCost)) return;
+                    projectState.riskPercent = 0;
+                    updateDashboard();
+                    return;
+                }
+            }
+            if (Math.random() < (0.20 - studioState.qaLevel * 0.01) ) {
+                const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+                const effectMessage = event.effect(projectState, studioState);
+                showRandomEventModal(event.name, event.description + (effectMessage ? " Consequence: " + effectMessage : ""), event.icon || SVGIcons.default_event);
+                if (studioState.companyFunds < 0) {
+                    updateDashboard();
+                    gameOver("Financial Crisis", `An unexpected event (${event.name}) led to insolvency. Capital: $${studioState.companyFunds}M.`);
+                    return;
+                }
+                updateDashboard();
+            }
+        }
+
+        function showRandomEventModal(name, description, svgIconHtml) {
+            document.getElementById('eventIconContainer').innerHTML = svgIconHtml || SVGIcons.default_event;
+            document.getElementById('randomEventName').textContent = name;
+            document.getElementById('randomEventDescription').textContent = description;
+            $('#randomEventModal').modal('show');
+        }
+
+        function generateSalesChartSVG(costs, sales, profit) { // Modernized chart
+            const BAR_MAX_HEIGHT = 40;
+            const BAR_WIDTH = 22;
+            const SPACING = 8;
+            const CHART_BASE_Y = 50;
+            const TEXT_Y = 55;
+            const FONT_SIZE = "0.5rem";
+            const LABEL_Y_OFFSET = -2; // how far above bar to put value label
+
+            let maxAbsValue = Math.max(Math.abs(costs), Math.abs(sales), Math.abs(profit), 1);
+
+            const costHeight = Math.max(1, (Math.abs(costs) / maxAbsValue) * BAR_MAX_HEIGHT); // min height 1
+            const salesHeight = Math.max(1, (Math.abs(sales) / maxAbsValue) * BAR_MAX_HEIGHT);
+            const profitHeight = Math.max(1, (Math.abs(profit) / maxAbsValue) * BAR_MAX_HEIGHT);
+
+            const costColor = "#6C757D"; // Muted Grey
+            const salesColor = "#17A2B8"; // Teal
+            const profitColor = profit >= 0 ? '#28A745' : '#DC3545'; // Green/Red
+
+            return `<svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <rect x="${SPACING}" y="${CHART_BASE_Y - costHeight}" width="${BAR_WIDTH}" height="${costHeight}" fill="${costColor}" rx="2"/>
+                <text x="${SPACING + BAR_WIDTH/2}" y="${TEXT_Y}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#343A40">COSTS</text>
+                <text x="${SPACING + BAR_WIDTH/2}" y="${CHART_BASE_Y - costHeight + LABEL_Y_OFFSET}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#FFF">$${costs}M</text>
+
+                <rect x="${SPACING*2 + BAR_WIDTH}" y="${CHART_BASE_Y - salesHeight}" width="${BAR_WIDTH}" height="${salesHeight}" fill="${salesColor}" rx="2"/>
+                <text x="${SPACING*2 + BAR_WIDTH + BAR_WIDTH/2}" y="${TEXT_Y}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#343A40">SALES</text>
+                <text x="${SPACING*2 + BAR_WIDTH + BAR_WIDTH/2}" y="${CHART_BASE_Y - salesHeight + LABEL_Y_OFFSET}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#FFF">$${sales}M</text>
+
+                <rect x="${SPACING*3 + BAR_WIDTH*2}" y="${CHART_BASE_Y - profitHeight}" width="${BAR_WIDTH}" height="${profitHeight}" fill="${profitColor}" rx="2"/>
+                <text x="${SPACING*3 + BAR_WIDTH*2 + BAR_WIDTH/2}" y="${TEXT_Y}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#343A40">PROFIT</text>
+                <text x="${SPACING*3 + BAR_WIDTH*2 + BAR_WIDTH/2}" y="${CHART_BASE_Y - profitHeight + LABEL_Y_OFFSET}" font-size="${FONT_SIZE}" text-anchor="middle" fill="#FFF">$${profit}M</text>
+
+                <line x1="5" y1="${CHART_BASE_Y}" x2="95" y2="${CHART_BASE_Y}" stroke="#DEE2E6" stroke-width="1"/>
+            </svg>`;
+        }
+
+
+        function endProject() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('marketReport').style.display = 'none';
+
+            let salesRevenue = 0;
+            if (projectState.marketReception <= 20) salesRevenue = 50;
+            else if (projectState.marketReception <= 40) salesRevenue = 150;
+            else if (projectState.marketReception <= 60) salesRevenue = 300;
+            else if (projectState.marketReception <= 80) salesRevenue = 500;
+            else salesRevenue = 700;
+
+            salesRevenue *= projectState.platformSalesMultiplier;
+            salesRevenue *= projectState.dlcSalesMultiplier;
+            salesRevenue = Math.round(salesRevenue);
+
+            const projectNetProfit = salesRevenue - projectState.accumulatedCosts;
+            studioState.companyFunds += projectNetProfit;
+
+            studioState.studioReputation += Math.round((projectState.gameQuality - 50) / 7); // Slower change
+            studioState.studioReputation += Math.round((projectState.marketReception - 50) / 7);
+            if (projectNetProfit < -50) studioState.studioReputation -= 4;
+            else if (projectNetProfit > 100) studioState.studioReputation += 4;
+
+            studioState.studioReputation = Math.max(0, Math.min(100, studioState.studioReputation));
+
+            studioState.gameLog.push({
+                level: studioState.currentLevel, profit: projectNetProfit,
+                quality: projectState.gameQuality, reception: projectState.marketReception,
+                costs: projectState.accumulatedCosts, sales: salesRevenue, genre: projectState.selectedGenre
+            });
+
+            document.getElementById('summaryChartContainer').innerHTML = generateSalesChartSVG(projectState.accumulatedCosts, salesRevenue, projectNetProfit);
+
+            if (studioState.companyFunds < 0) {
+                gameOver("Insolvency", `Project completion resulted in negative capital ($${studioState.companyFunds}M).`);
+                return;
+            }
+            if (studioState.studioReputation < MIN_REPUTATION_GAME_OVER && studioState.currentLevel > 1) {
+                gameOver("Reputation Crisis", `Studio reputation critically low (${studioState.studioReputation}/100). Public and industry perception is vital.`);
+                return;
+            }
+            if (projectState.gameQuality < MIN_GAME_QUALITY_GAME_OVER) {
+                gameOver("Critical Failure", `Product ${studioState.currentLevel} (${projectState.selectedGenre}) failed quality standards (Quality: ${projectState.gameQuality}/100).`);
+                return;
+            }
+
+            const summaryEl = document.getElementById('projectSummaryScreen');
+            document.getElementById('projectSummaryTitle').textContent = `Project ${studioState.currentLevel} (${projectState.selectedGenre || 'N/A'}) Debrief`;
+            document.getElementById('projectMetrics').innerHTML = `
+                <p><strong>Product Quality:</strong> ${projectState.gameQuality}/100</p>
+                <p><strong>Market Reception:</strong> ${projectState.marketReception}/100</p>
+                <p><strong>Team Morale (End):</strong> ${projectState.teamMorale}/100</p>
+                <hr class="my-3">
+                <p><strong>Total Investment:</strong> $${projectState.accumulatedCosts}M</p>
+                <p><strong>Gross Revenue:</strong> $${salesRevenue}M</p>
+                <p><strong>Net Profit/Loss:</strong> <strong class="${projectNetProfit >= 0 ? 'text-success' : 'text-danger'}">$${projectNetProfit}M</strong></p>
+                <hr class="my-3">
+                <p><strong>Studio Capital:</strong> $${studioState.companyFunds}M</p>
+                <p><strong>Studio Reputation:</strong> ${studioState.studioReputation}/100</p>`;
+
+            const recapEl = document.getElementById('projectDecisionRecap');
+            recapEl.innerHTML = '';
+            projectState.chosenDecisionsLog.forEach(log => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${log.decision} &rarr; ${log.option}:</strong> <em class="text-muted">(${log.consequences})</em>`;
+                recapEl.appendChild(li);
+            });
+
+            document.getElementById('projectEducationalBlurb').innerHTML = generateEducationalBlurb(projectNetProfit, projectState.gameQuality, projectState.teamMorale, projectState.marketReception, projectState.accumulatedCosts, projectState.baseDevelopmentCost);
+
+            const nextStepButton = document.getElementById('nextStepButton');
+            if (studioState.currentLevel >= studioState.maxLevels && studioState.maxLevels > 0) {
+                nextStepButton.textContent = 'View Final Company Report';
+                nextStepButton.onclick = grandSuccess;
+            } else {
+                nextStepButton.textContent = 'Proceed to Studio Upgrades';
+                nextStepButton.onclick = displayStudioManagementScreen;
+            }
+            summaryEl.style.display = 'block';
+        }
+
+        function generateEducationalBlurb(profit, quality, morale, reception, totalCosts, baseBudget) { // More professional tone
+            let blurb = "<h4>Strategic Analysis:</h4><ul>";
+            if (profit > 50 && quality > 70 && reception > 65) {
+                blurb += "<li><strong class='text-success'>Exceptional Performance:</strong> This project significantly exceeded financial and critical expectations. Effective strategic alignment across development, marketing, and post-launch phases.</li>";
+            } else if (profit < -20 || quality < 40 || reception < 30) {
+                blurb += "<li><strong class='text-danger'>Significant Underperformance:</strong> The project incurred substantial losses or failed to meet quality/market benchmarks. A thorough post-mortem is advised to identify critical missteps in strategy or execution.</li>";
+            } else {
+                blurb += "<li><strong>Mixed Performance:</strong> The project yielded moderate results. The AAA market requires consistent high performance; review decision points for optimization opportunities.</li>";
+            }
+
+            if (totalCosts > baseBudget * 1.4 && totalCosts > 150) {
+                blurb += "<li><strong>Budget Overrun:</strong> Actual expenditures significantly exceeded initial projections. Re-evaluate cost control measures, scope discipline, and risk mitigation for future projects.</li>";
+            } else if (totalCosts < baseBudget * 0.9 && baseBudget > 100) {
+                 blurb += "<li><strong>Cost Efficiency:</strong> Project completed under budget. Validate that this efficiency did not compromise essential quality or long-term product viability.</li>";
+            }
+
+            if (morale < 30) {
+                blurb += "<li><strong class='text-warning'>Critical Morale Deficit:</strong> Severely low team morale can impede innovation, productivity, and talent retention. Prioritize investments in HR and work environment.</li>";
+            } else if (morale > 75) {
+                blurb += "<li><strong>High Team Engagement:</strong> Excellent morale indicates a positive and productive work culture, a key asset for sustained success.</li>";
+            }
+
+            if (quality < 50 && reception > 60) {
+                blurb += "<li><strong>Market Anomaly:</strong> The product resonated with the market despite quality concerns. This may indicate effective marketing or a strong niche appeal, but relying on this pattern is high-risk.</li>";
+            } else if (quality > 70 && reception < 50) {
+                blurb += "<li><strong>Market Misalignment:</strong> A high-quality product underperformed in the market. Investigate potential issues with genre selection, marketing strategy, release timing, or competitive landscape.</li>";
+            }
+            blurb += "</ul>";
+            return blurb;
+        }
+
+        function gameOver(type, reason) {
+            $('#randomEventModal').modal('hide');
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('studioManagementScreen').style.display = 'none';
+            document.getElementById('projectSummaryScreen').style.display = 'none';
+            document.getElementById('grandSuccessScreen').style.display = 'none';
+            document.getElementById('marketReport').style.display = 'none';
+
+            document.getElementById('gameOverReason').innerHTML = `<strong>${type}:</strong> ${reason}`;
+            document.getElementById('finalStudioStats').innerHTML = `
+                <p><strong>Final Capital:</strong> $${studioState.companyFunds}M</p>
+                <p><strong>Brand Reputation:</strong> ${studioState.studioReputation}/100</p>
+                <p><strong>Projects Launched:</strong> ${studioState.currentLevel -1}</p>
+                <p><strong>Studio Infrastructure:</strong> R&D Lvl ${studioState.rndLevel}, Marketing Lvl ${studioState.marketingLevel}, HR Lvl ${studioState.hrLevel}, QA Lvl ${studioState.qaLevel}</p>`;
+
+            const logEl = document.getElementById('gameOverProjectLog');
+            logEl.innerHTML = '';
+            studioState.gameLog.forEach(g => {
+                const li = document.createElement('li');
+                li.innerHTML = `Cycle ${g.level} (${g.genre || 'N/A'}): Net $${g.profit}M | Quality ${g.quality} | Market ${g.reception}`;
+                logEl.appendChild(li);
+            });
+            document.getElementById('gameOverScreen').style.display = 'block';
+        }
+
+        function grandSuccess() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('studioManagementScreen').style.display = 'none';
+            document.getElementById('projectSummaryScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('marketReport').style.display = 'none';
+
+            document.getElementById('successStudioStats').innerHTML = `
+                <p><strong>Final Capitalization:</strong> $${studioState.companyFunds}M</p>
+                <p><strong>Global Brand Reputation:</strong> ${studioState.studioReputation}/100</p>
+                <p><strong>Flagship Projects Launched:</strong> ${studioState.maxLevels}</p>
+                <p><strong>Studio Infrastructure Level:</strong> R&D Lvl ${studioState.rndLevel}, Marketing Lvl ${studioState.marketingLevel}, HR Lvl ${studioState.hrLevel}, QA Lvl ${studioState.qaLevel}</p>`;
+
+            const logEl = document.getElementById('successProjectLog');
+            logEl.innerHTML = '';
+            studioState.gameLog.forEach(g => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>Cycle ${g.level} (${g.genre || 'N/A'}):</strong> Net Profit $${g.profit}M (Revenue: $${g.sales}M, Investment: $${g.costs}M) | Quality ${g.quality} | Market ${g.reception}`;
+                logEl.appendChild(li);
+            });
+            document.getElementById('grandSuccessScreen').style.display = 'block';
+        }
+
+        // Initialize
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        restartGame();
+
+    </script>
+</body>
+</html>

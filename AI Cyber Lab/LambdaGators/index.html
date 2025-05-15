@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lambda Gators</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Lambda Gators: An AI-Crafted Journey into Lambda Calculus!</h1>
+    </header>
+
+    <div id="game-container">
+        <main id="game-area" class="content-box">
+            <h2>Game Board</h2>
+            <div id="function-display-area">
+                <p class="placeholder-text">(Function to be fed will appear here)</p>
+            </div>
+            <div id="argument-staging-area">
+                <p class="placeholder-text">(Drag arguments here, or they'll appear for puzzles)</p>
+            </div>
+        </main>
+
+        <aside id="explanation-panel" class="content-box">
+            <h2>How to Play / Explanations</h2>
+            <p id="explanation-text-display">
+                Welcome to Lambda Gators! Drag families of alligator eggs to feed hungry alligators and see lambda calculus in action.
+                Detailed explanations about the current step or concept will appear here.
+            </p>
+            <div id="lambda-notation-display">
+                <p class="placeholder-text">(Lambda Notation will appear here)</p>
+            </div>
+        </aside>
+    </div>
+
+    <section id="controls-section" class="content-box">
+        <h2>Controls</h2>
+        <button id="reset-button">Reset Puzzle</button>
+        <button id="next-example-button">Next Puzzle</button>
+        <button id="apply-manually-button">Apply Manually</button>
+        <button id="about-project-button">About Lambda Gators</button> <!-- NEW BUTTON -->
+        <p class="placeholder-text" id="controls-placeholder-text" style="display: none;">(Control buttons will be activated later)</p>
+    </section>
+
+    <!-- NEW SECTION FOR PROJECT DESCRIPTION - Initially hidden -->
+    <section id="project-description-section" class="content-box" style="display: none; margin-top: 25px;">
+        <h2>About Lambda Gators: An AI-Crafted Journey into Lambda Calculus!</h2>
+        <div id="project-description-content">
+            <!-- Content will be injected by JavaScript -->
+        </div>
+    </section>
+
+    <section id="tromp-diagram-section" class="content-box">
+        <h2>Tromp Diagram Visualization</h2>
+        <svg id="tromp-diagram-svg-container" width="600" height="400"></svg>
+    </section>
+
+    <script src="js/main.js" defer></script>
+    
+    <!-- Placeholder for future Anime.js CDN (from Phase 6) -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> -->
+
+</body>
+</html>

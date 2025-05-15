@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Cyber Lab - Integrated</title>
+  <style>
+    /* --- Global Styles --- */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1a1a1a url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><rect width="100" height="100" fill="none" stroke="#ff00ff" stroke-width="1"/><line x1="0" y1="0" x2="100" y2="100" stroke="#00ff00" stroke-width="0.5"/><line x1="100" y1="0" x2="0" y2="100" stroke="#00ff00" stroke-width="0.5"/></svg>');
+      color: #e0e0e0;
+      font-family: 'VT323', monospace;
+      overflow-x: hidden;
+      font-size: 1em; /* Base font size */
+    }
+
+    /* Custom Scrollbar for Webkit Browsers */
+    body::-webkit-scrollbar {
+      width: 12px;
+    }
+    body::-webkit-scrollbar-track {
+      background: #111;
+      border-left: 1px solid #333;
+    }
+    body::-webkit-scrollbar-thumb {
+      background-color: #ff00ff;
+      border-radius: 6px;
+      border: 2px solid #111;
+    }
+    body::-webkit-scrollbar-thumb:hover {
+      background-color: #00ff00;
+    }
+
+    /* --- Section Spacing --- */
+    section:not(#hero) { 
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+
+    /* --- Header Styles --- */
+    header {
+      background: #08080a; 
+      padding: 20px 40px; 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ff00ff;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      overflow: hidden; 
+    }
+    #header-background-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; 
+        opacity: 0.3; 
+    }
+
+    header h1 {
+      font-size: 2.2em; 
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff; 
+      animation: glitch 2.5s infinite alternate;
+      margin: 0;
+      position: relative; 
+      z-index: 1;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0, 0); text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff; }
+      10%, 30%, 50%, 70%, 90% { transform: translate(-2px, 2px) skewX(5deg); text-shadow: 0 0 8px #00ff00, 0 0 12px #00ff00, 0 0 18px #00ff00; color: #00ff00;} 
+      20%, 40%, 60%, 80% { transform: translate(2px, -2px) skewX(-5deg); text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff, 0 0 18px #ff00ff; color: #ff00ff;}
+    }
+
+    /* --- Navigation Styles --- */
+    nav {
+      position: relative; 
+      z-index: 1;
+    }
+    nav a {
+      color: #00ff00;
+      text-decoration: none;
+      margin: 0 15px; 
+      font-size: 1.2em; 
+      transition: color 0.3s, text-shadow 0.3s;
+      text-shadow: 0 0 3px #00ff00; 
+      outline: none; 
+    }
+
+    nav a:hover, nav a:focus {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+    }
+    nav a:focus {
+      outline: 2px dashed #ff00ff;
+      outline-offset: 3px;
+    }
+
+
+    /* --- Hero Section Styles --- */
+    #hero {
+      height: 75vh;
+      min-height: 400px; 
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0d0d0d;
+      overflow: hidden;
+    }
+
+    #hero-canvas { 
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      cursor: grab;
+    }
+     #hero-canvas:active {
+        cursor: grabbing;
+    }
+
+
+    #neon-sign-container {
+      position: relative; 
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80%;
+      max-width: 600px; 
+    }
+
+    #neon-sign {
+        width: 100%;
+        height: 150px; 
+    }
+
+
+    /* --- Projects Section Styles --- */
+    #projects {
+      /* padding handled by general section rule */
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+    }
+
+    .projects-section-title {
+        font-size: 2.5em; 
+        color: #00ff00;
+        text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        margin-bottom: 40px; 
+        text-align: center;
+        border-bottom: 2px solid #008000; 
+        padding-bottom: 10px; 
+        width: 80%;
+        max-width: 800px; 
+    }
+    
+    #project-hub-interface {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 30px; 
+        width: 100%;
+        max-width: 1000px; 
+        margin-top: 20px; 
+    }
+
+    .project-card {
+        background: rgba(20, 20, 30, 0.9); 
+        border: 2px solid #00ff00; 
+        border-radius: 8px; 
+        padding: 25px; 
+        color: #c0c0c0;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+        outline: none; 
+    }
+
+    .project-card:hover, .project-card:focus {
+        transform: translateY(-5px) scale(1.02); 
+        box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00, 0 0 35px #ff00ff; 
+        border-color: #ff00ff;
+    }
+    .project-card:focus { 
+        box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00, 0 0 35px #ff00ff, 0 0 0 2px #ff00ff; 
+    }
+
+
+    .project-card h3 {
+        color: #ff00ff;
+        font-size: 1.7em; 
+        margin-top: 0;
+        margin-bottom: 15px; 
+        text-shadow: 0 0 4px #ff00ff; 
+    }
+    .project-card .project-description { 
+        font-size: 1.05em; 
+        line-height: 1.65; 
+        color: #b0b0b0; 
+        margin-bottom: 15px; 
+        flex-grow: 1; 
+        letter-spacing: -0.5px; 
+    }
+     .project-card .access-prompt {
+        font-size: 1em; 
+        color: #00ff00;
+        text-align: right;
+        margin-top: 15px; 
+        font-style: italic;
+        font-weight: bold;
+    }
+    .project-card .access-prompt::before {
+        content: ">> ACCESS ARCHIVE // ";
+    }
+
+
+    .window {
+      background: rgba(17, 17, 17, 0.95); 
+      backdrop-filter: blur(8px); 
+      padding: 25px; 
+      border: 2px solid #ff00ff; 
+      border-radius: 8px; 
+      box-shadow: 0 0 20px #ff00ff, 0 0 35px #00ff00; 
+      color: #c0c0c0; 
+      display: none; 
+      flex-direction: column; 
+      width: 90%; 
+      max-width: 950px; 
+      margin-top: 30px; 
+      animation: fadeInWindow 0.5s ease-out;
+    }
+    
+    @keyframes fadeInWindow {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .window.active { 
+        display: flex;
+    }
+
+
+    .window h2 { 
+      color: #ff00ff; 
+      font-size: 2em; 
+      margin-top: 0;
+      margin-bottom: 20px; 
+      text-shadow: 0 0 5px #ff00ff; 
+      text-align: center;
+    }
+        
+    .iframe-container { 
+        width: 100%; 
+        height: 450px; /* Default height */
+        margin-top: 15px; 
+        margin-bottom: 10px;
+        border: 1px solid #00cc00; 
+        border-radius: 4px; 
+        overflow: hidden; 
+        background-color: #050505; 
+    }
+
+    .iframe-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none; 
+    }
+    
+    .lavalamp-iframe-container { height: 750px; }
+    .gameoflife-iframe-container { height: 800px; }
+    .gameoflife3d-iframe-container { height: 850px; }
+    .cyberpunkman-iframe-container { height: 700px; }
+    .flappyzebra-iframe-container { height: 650px; }
+    .fractal-explorer-iframe-container { height: 750px; }
+    .gamestudio-iframe-container { height: 800px; }
+    .chemgame-iframe-container { height: 750px; }
+
+
+    .project-link-button, .back-to-hub-button { 
+        display: inline-block; 
+        margin-top: 15px; 
+        padding: 10px 20px; 
+        background-color: #00ff00; 
+        color: #111; 
+        text-decoration: none; 
+        border-radius: 4px; 
+        font-weight: bold; 
+        text-align: center;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        align-self: center; 
+        cursor: pointer;
+        box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        outline: none; 
+        font-size: 1em;
+    }
+    .project-link-button:hover, .project-link-button:focus,
+    .back-to-hub-button:hover, .back-to-hub-button:focus {
+        background-color: #33ff33;
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    }
+    .project-link-button:focus, .back-to-hub-button:focus {
+      outline: 2px dashed #00ff00;
+      outline-offset: 2px;
+    }
+
+    .back-to-hub-button {
+        background-color: #ff00ff;
+        color: #fff;
+        margin-bottom: 20px; 
+        box-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+    }
+    .back-to-hub-button:hover, .back-to-hub-button:focus {
+        background-color: #ff33ff;
+         box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    }
+     .back-to-hub-button:focus {
+        outline: 2px dashed #ff00ff;
+        outline-offset: 2px;
+    }
+    
+    /* --- About Section / Retro Computer Styles --- */
+    #about {
+        background: #101015; /* Darker, techy background for the section */
+    }
+
+    #retro-computer-container {
+        width: 100%;
+        max-width: 750px; 
+        margin: 20px auto;
+        padding: 15px; 
+    }
+
+    #retro-monitor {
+        background: #2A2A3A; 
+        border: 4px solid #181820; 
+        border-radius: 25px 25px 10px 10px; 
+        padding: 25px; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5), 
+                    inset 0 0 15px rgba(0,0,0,0.3),
+                    0 0 5px rgba(0,255,0,0.1); 
+        position: relative;
+    }
+
+    #monitor-bezel {
+        background: #111; 
+        padding: 20px; 
+        border-radius: 10px; 
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.8); 
+    }
+
+    #monitor-screen {
+        background: #0A140A; 
+        color: #00FF00; 
+        font-family: 'VT323', monospace;
+        padding: 20px;
+        height: 500px; 
+        overflow-y: auto; 
+        border: 3px solid #050F05; 
+        border-radius: 3px; 
+        box-shadow: inset 0 0 30px rgba(0, 255, 0, 0.1), 
+                    inset 0 0 5px rgba(0,0,0,0.5), 
+                    0 0 2px rgba(0,255,0,0.6); 
+        position: relative;
+        background-image: linear-gradient(rgba(0,20,0,0.15) 50%, transparent 50%);
+        background-size: 100% 4px; 
+        animation: scanlines 60s linear infinite;
+    }
+    @keyframes scanlines {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 100%; }
+    }
+
+    #monitor-screen::-webkit-scrollbar { width: 12px; }
+    #monitor-screen::-webkit-scrollbar-track { background: #0F140F; border-left: 1px solid #003300;}
+    #monitor-screen::-webkit-scrollbar-thumb { background-color: #008000; border-radius: 4px; border: 1px solid #005500;}
+    #monitor-screen::-webkit-scrollbar-thumb:hover { background-color: #00AA00; }
+
+
+    .screen-line {
+        margin-bottom: 5px; 
+        min-height: 1.8em; 
+        white-space: pre-wrap; 
+        line-height: 1.8; 
+        font-size: 1.2em; 
+        color: #00FF00; 
+        word-break: break-all; 
+    }
+    .screen-line span.line-text-content { 
+        display: inline; 
+    }
+
+    .screen-line.typing-active > span.line-text-content,
+    .screen-line.prompt-active > span.line-text-content {
+        background-color: #00cc00; 
+        color: #080A08; 
+        padding: 0 3px; 
+    }
+    
+    .screen-line.style-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #88ff88; 
+        margin-top: 10px;
+        margin-bottom: 8px;
+        font-size: 1.3em;
+    }
+    .screen-line.style-highlight > span.line-text-content {
+        background-color: rgba(0, 255, 0, 0.1); 
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+    .screen-line.style-command > span.line-text-content {
+        color: #ff66ff; 
+    }
+    .screen-line.empty-line { min-height: 0.8em; }
+
+    #retro-logo {
+        display: none; 
+        width: 80px !important; 
+        height: 80px !important;
+        border: 2px solid #00AA00 !important; 
+        object-fit: scale-down;
+        margin: 10px auto 20px auto; 
+        border-radius: 50%; 
+        background-color: rgba(0,50,0,0.3); 
+        padding: 5px;
+    }
+
+    .blinking-cursor-screen {
+        animation: blinkScreenCursor 0.8s step-end infinite;
+        background-color: #00FF00; 
+        color: #00FF00; 
+        display: inline-block;
+        width: 0.6em; 
+        height: 1.2em; 
+        vertical-align: text-bottom; 
+        margin-left: 2px;
+        box-shadow: 0 0 3px #00FF00;
+    }
+    @keyframes blinkScreenCursor {
+        0%, 100% { background-color: #00FF00; color: #00FF00; }
+        50% { background-color: transparent; color: transparent; }
+    }
+
+    #monitor-stand {
+        width: 40%;
+        height: 30px;
+        background: linear-gradient(to bottom, #252530, #1C1C24);
+        margin: -8px auto 0 auto; 
+        border-radius: 0 0 15px 15px;
+        border: 3px solid #111115;
+        border-top: none;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+        position: relative;
+        z-index: -1; 
+    }
+    #monitor-stand::before { 
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70%;
+        height: 8px;
+        background: #15151A;
+        border-radius: 0 0 8px 8px;
+    }
+
+
+    /* --- Japanese Neon Motif Styles --- */
+    .japanese-neon-motif {
+        font-family: 'Noto Sans JP', sans-serif; 
+        text-align: center;
+        padding: 25px 10px; 
+        font-size: 2em; 
+        font-weight: 700; 
+        color: #ff00ff; 
+        background-color: rgba(10,10,10,0.85); 
+        margin-top: 40px; 
+        margin-bottom: 0; 
+        border-top: 2px solid #440044; 
+        border-bottom: 2px solid #440044; 
+        letter-spacing: 0.1em; 
+        text-shadow: 
+            0 0 5px #ff00ff,
+            0 0 10px #ff00ff,
+            0 0 15px #ff00ff;
+        word-break: keep-all; 
+        overflow-wrap: break-word; 
+        transition: text-shadow 0.05s ease-in-out; 
+    }
+    .japanese-neon-motif span { 
+        display: inline-block; 
+        transition: text-shadow 0.05s ease-in-out, opacity 0.1s ease-in-out;
+    }
+
+
+    /* --- Footer Styles --- */
+    footer {
+      background: #111; 
+      padding: 30px 25px; 
+      text-align: center;
+      border-top: 2px solid #ff00ff; 
+    }
+
+    footer p {
+      color: #00ff00; 
+      margin: 8px 0; 
+      font-size: 1em; 
+    }
+    footer a {
+      color: #ff00ff;
+      text-decoration: none;
+      transition: color 0.3s, text-decoration 0.3s;
+       outline: none; 
+    }
+    footer a:hover, footer a:focus {
+      text-decoration: underline;
+      color: #00ff00; 
+    }
+    footer a:focus {
+        outline: 2px dashed #00ff00;
+        outline-offset: 2px;
+    }
+
+
+    /* --- Responsive Design Adjustments --- */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        padding: 15px 20px;
+      }
+      header h1 { font-size: 1.8em; margin-bottom: 10px; } 
+      nav { margin-top: 10px; }
+      nav a { font-size: 1em; margin: 0 8px; } 
+      #hero { height: 50vh; }
+      #neon-sign-container { width: 90%; }
+      #neon-sign { height: 100px; } 
+      
+      section:not(#hero) {
+        padding-top: 40px;
+        padding-bottom: 40px;
+      }
+      #projects { padding-left: 15px; padding-right: 15px;} 
+      #about { padding-left: 10px; padding-right: 10px;} 
+      #retro-computer-container { max-width: 95%; padding: 5px;}
+      #retro-monitor { padding: 10px; border-radius: 15px 15px 5px 5px;}
+      #monitor-bezel { padding: 10px; border-radius: 8px;}
+      #monitor-screen { height: 400px; padding: 10px; font-size:1em;} 
+      .screen-line { font-size: 1em; line-height: 1.2; min-height: 1.2em; }
+
+
+      .window { width: 95%; }
+      .window h2 { font-size: 1.5em; } 
+      .project-card h3 { font-size: 1.4em; } 
+      .project-card .project-description { font-size: 0.95em; line-height: 1.6; } 
+      .iframe-container { height: 350px; }
+      .lavalamp-iframe-container, .fractal-explorer-iframe-container, .gamestudio-iframe-container, .chemgame-iframe-container { height: 600px; }
+      .gameoflife-iframe-container, .gameoflife3d-iframe-container { height: 700px; }
+      .cyberpunkman-iframe-container, .flappyzebra-iframe-container { height: 550px; }
+      #project-hub-interface { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; } 
+      .japanese-neon-motif { font-size: 1.5em; padding: 15px 10px; letter-spacing: 0.08em; } 
+      .projects-section-title { font-size: 2em; } 
+    }
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.6em; }
+      nav a { font-size: 0.9em; }
+      .japanese-neon-motif { font-size: 1.2em; padding: 10px 5px; letter-spacing: 0.05em; } 
+      #project-hub-interface { grid-template-columns: 1fr; }
+      .lavalamp-iframe-container, .fractal-explorer-iframe-container, .gamestudio-iframe-container, .chemgame-iframe-container { height: 550px; }
+      .gameoflife-iframe-container, .gameoflife3d-iframe-container { height: 650px; }
+      .cyberpunkman-iframe-container, .flappyzebra-iframe-container { height: 450px; }
+      .projects-section-title { font-size: 1.8em; } 
+      #monitor-screen { height: 350px; font-size: 0.9em;}
+      .screen-line { font-size: 0.95em; }
+      .project-card .project-description { font-size: 0.9em; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.15/paper-full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <header>
+    <canvas id="header-background-canvas"></canvas>
+    <h1>AI Cyber Lab</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#footer-section">Contact</a> 
+    </nav>
+  </header>
+
+  <section id="hero">
+    <div id="neon-sign-container">
+        <canvas id="neon-sign" resize></canvas> 
+    </div>
+    <div id="hero-canvas"></div> 
+  </section>
+
+  <section id="projects">
+    <h2 class="projects-section-title">// MISSION SELECT TERMINAL //</h2>
+    <div id="project-hub-interface">
+      <div class="project-card" data-target-project="fractal-explorer-window" tabindex="0">
+        <h3>Project Infinity: A Fractal Odyssey</h3>
+        <p class="project-description">
+          Embark on a 'Fractal Odyssey' to explore the infinite intricacies of the Mandelbrot and Julia sets. 
+          This interactive visualization serves as a powerful tool for teaching complex numbers, demonstrating how simple iterative equations 
+          in the complex plane can generate boundless, mesmerizing detail. Witness the 'multiple infinities' concept as you zoom into the 
+          Mandelbrot set, observing how quickly different points 'escape' to infinity—their 'speed' of divergence painted by varying colors. 
+          Click on a point within the Mandelbrot set to generate its corresponding Julia set, revealing an entirely new, related fractal universe.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="gol-2d-window" tabindex="0">
+        <h3>Project Genesis: Conway's Life (2D)</h3>
+        <p class="project-description">
+          Delve into the fascinating world of cellular automata with this interactive 2D visualization of John Conway's Game of Life. 
+          Witness how a few elementary rules governing cell birth, survival, and death can give rise to an astonishing diversity of 
+          dynamic patterns and 'lifeforms' that evolve across generations. This simulation demonstrates the power of pure computation to model complex emergent behaviors. 
+          This exploration serves as a profound parallel to biological life, where simple local interactions can lead to global 
+          self-organization and the illusion of purposeful movement. Use the controls to customize the rules, seed famous patterns, 
+          or draw your own initial state and observe the digital ecosystem unfold.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="gol-3d-window" tabindex="0">
+        <h3>Project Emergence: Conway's Life (3D)</h3>
+        <p class="project-description">
+          Venture into the next dimension of cellular automata with this interactive 3D visualization of Conway's Game of Life. 
+          By extending the classic rules into a three-dimensional grid, we observe how simple local interactions between cells 
+          give rise to even more intricate and spatially complex 'lifeforms'. Explore how fundamental rules of computation can generate 
+          behaviors that mirror the self-organization and emergent complexity seen in biological systems developing in a 3D space. Manipulate the birth and survival rules, seed the universe 
+          with various 3D geometric patterns, or introduce random clusters and watch them evolve.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="lava-lamp-window" tabindex="0">
+        <h3>Project Sentient Flow: AI Lava Lamp</h3>
+        <p class="project-description">
+          Witness the emotional state of a locally-run AI companion, powered by an RTX 3090, visualized in real-time. 
+          This project, 'Chromatic Emotions,' translates the AI's sentiment analysis into a mesmerizing lava lamp display. 
+          Each of the eight basic emotions is represented by a distinct color and dynamically influences the lamp's fluid dynamics. The blobs' size, speed, and trails shift, 
+          offering an instantaneous, ambient visual feedback loop on the AI's output.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="game-studio-window" tabindex="0">
+        <h3>Project Tycoon: AI-Enhanced Game Studio Strategist</h3>
+        <p class="project-description">
+          Step into the CEO's chair with 'Project Tycoon,' an immersive simulation designed for eSports and Game Design students. 
+          This project showcases innovative AI integration by using AI to help generate complex scenarios and decision trees for a gamified learning experience. 
+          Students navigate the intricacies of running a game studio—making critical decisions on funding, genre selection, talent, development pace, marketing, and post-launch support, all while an AI helps shape the dynamic market conditions and events. This tool exemplifies how AI can build sophisticated educational simulations, making the complex world of game development business strategy both engaging and insightful.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="chem-balancer-window" tabindex="0">
+        <h3>Project Chem-AIstry: AI-Assisted Equation Balancer</h3>
+        <p class="project-description">
+          Master the art of balancing chemical equations with 'Chem-AIstry,' an interactive game developed in collaboration with chemistry educators. 
+          This tool not only gamifies learning but also integrates a specialized local AI (Gemma2:2b with RAG implementation) 
+          designed to provide targeted assistance and explanations for students. Students can practice balancing equations, receive intelligent feedback, 
+          and deepen their understanding of stoichiometry.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="cyberpunkman-window" tabindex="0">
+        <h3>Project Neon-Nom: Cyber-PunkMan</h3>
+        <p class="project-description">
+          Navigate the glowing, digital corridors of 'Cyber-PunkMan,' a retro-classic reimagined with a cyberpunk aesthetic. 
+          This project demonstrates AI in the creative process for building engaging interactive experiences. 
+          Guiding students through such projects sparks their creativity, enhances AI literacy, and teaches practical AI workflow integrations. 
+          Dodge rogue AI ghosts and devour data pellets in this neon-drenched maze!
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+      <div class="project-card" data-target-project="flappy-zebra-window" tabindex="0">
+        <h3>Project Stripe-Flight: Flappy Zebra</h3>
+        <p class="project-description">
+          Take to the skies (or, rather, the classroom!) with 'Flappy Zebra,' a fun twist on a classic arcade game, 
+          co-created with computer science students and featuring our school mascot. This project isn't just about navigating 
+          a leaping zebra through obstacles; it's a practical lesson in game development fundamentals, event handling, and 
+          physics simulation using p5.js. More importantly, it serves as a launchpad for discussing AI workflow integrations – from using AI 
+          for generating art assets to exploring AI for dynamic difficulty adjustment.
+        </p>
+        <p class="access-prompt">Access Archive</p>
+      </div>
+    </div>
+
+    <div class="window" id="fractal-explorer-window">
+        <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+        <h2>Project Infinity: A Fractal Odyssey</h2>
+        <div class="iframe-container fractal-explorer-iframe-container">
+          <iframe 
+              src="/Mandelbrot2.html" 
+              title="Project Infinity: A Fractal Odyssey"
+              scrolling="no" loading="lazy"> 
+              Your browser does not support iframes. Please 
+              <a href="/Mandelbrot2.html" target="_blank">click here to view the project</a>.
+          </iframe>
+        </div>
+        <a href="/Mandelbrot2.html" target="_blank" class="project-link-button">
+          Explore Fractals in New Tab &gt;&gt;
+        </a>
+    </div>
+
+    <div class="window" id="gol-2d-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Genesis: Conway's Computational Lifeforms (2D)</h2>
+      <div class="iframe-container gameoflife-iframe-container">
+        <iframe 
+            src="/GOL_2.html" 
+            title="Project Genesis: Conway's Computational Lifeforms (2D)"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/GOL_2.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/GOL_2.html" target="_blank" class="project-link-button">
+        Open 2D Game of Life in New Tab &gt;&gt;
+      </a>
+    </div>
+
+    <div class="window" id="gol-3d-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Emergence: Conway's Computational Lifeforms (3D)</h2>
+      <div class="iframe-container gameoflife3d-iframe-container">
+        <iframe 
+            src="/GOL3d_3.html" 
+            title="Project Emergence: Conway's Computational Lifeforms (3D)"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/GOL3d_3.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/GOL3d_3.html" target="_blank" class="project-link-button">
+        Open 3D Game of Life in New Tab &gt;&gt;
+      </a>
+    </div>
+    
+    <div class="window" id="lava-lamp-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Sentient Flow: AI Emotion Lava Lamp</h2>
+      <div class="iframe-container lavalamp-iframe-container">
+        <iframe 
+            src="/viz_LavaLamp.html" 
+            title="Project Sentient Flow: AI Emotion Lava Lamp Visualization"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/viz_LavaLamp.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/viz_LavaLamp.html" target="_blank" class="project-link-button">
+        Open Visualization in New Tab &gt;&gt;
+      </a>
+    </div>
+
+    <div class="window" id="game-studio-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Tycoon: AI-Enhanced Game Studio Strategist</h2>
+      <div class="iframe-container gamestudio-iframe-container">
+        <iframe 
+            src="/Game Studio Strategist.html" 
+            title="Project Tycoon: AI-Enhanced Game Studio Strategist"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/Game Studio Strategist.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/Game Studio Strategist.html" target="_blank" class="project-link-button">
+        Play Game Studio Strategist &gt;&gt;
+      </a>
+    </div>
+    
+    <div class="window" id="chem-balancer-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Chem-AIstry: AI-Assisted Equation Balancer</h2>
+      <div class="iframe-container chemgame-iframe-container">
+        <iframe 
+            src="/Chem Game.html" 
+            title="Project Chem-AIstry: AI-Assisted Equation Balancer"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/Chem Game.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/Chem Game.html" target="_blank" class="project-link-button">
+        Balance Equations &gt;&gt;
+      </a>
+    </div>
+
+    <div class="window" id="cyberpunkman-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Neon-Nom: Cyber-PunkMan</h2>
+      <div class="iframe-container cyberpunkman-iframe-container">
+        <iframe 
+            src="/Punkman.html" 
+            title="Project Neon-Nom: Cyber-PunkMan"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/Punkman.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/Punkman.html" target="_blank" class="project-link-button">
+        Play Cyber-PunkMan in New Tab &gt;&gt;
+      </a>
+    </div>
+
+    <div class="window" id="flappy-zebra-window">
+      <button class="back-to-hub-button">&lt;&lt; Return to Mission Select</button>
+      <h2>Project Stripe-Flight: Flappy Zebra</h2>
+      <div class="iframe-container flappyzebra-iframe-container">
+        <iframe 
+            src="/Flappy Zebra\FlappyZebra.html" 
+            title="Project Stripe-Flight: Flappy Zebra"
+            scrolling="no" loading="lazy"> 
+            Your browser does not support iframes. Please 
+            <a href="/Flappy Zebra\FlappyZebra.html" target="_blank">click here to view the project</a>.
+        </iframe>
+      </div>
+      <a href="/Flappy Zebra\FlappyZebra.html" target="_blank" class="project-link-button">
+        Play Flappy Zebra in New Tab &gt;&gt;
+      </a>
+    </div>
+  </section>
+
+  <section id="about" class="px-4 md:px-8">
+    <div class="max-w-4xl mx-auto text-center"> 
+        <h2 class="text-3xl md:text-4xl font-bold mb-8 text-pink-500" style="color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff;">
+            // About the Lab_ // SYSTEM_INFO
+        </h2>
+        <div id="retro-computer-container">
+            <div id="retro-monitor">
+                <div id="monitor-bezel">
+                    <div id="monitor-screen">
+                        <img src="https://drive.google.com/uc?export=view&id=1PWCAx9v3F3UaKb0d-rJl1gsqd3McTQ1o"
+                             alt="AI Cyber Lab Logo"
+                             onerror="this.onerror=null; this.src='/OctoLogo200.jpg';"
+                             id="retro-logo">
+                        <div id="screen-content">
+                            </div>
+                    </div>
+                </div>
+                <div id="monitor-stand"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const screenTypingSpeed = 30; 
+        const screenLineDelay = 100;  
+        const screenCharDelay = 500; 
+
+        const aboutScreenContent = [
+            { type: 'image', id: 'retro-logo', delayBefore: 300, delayAfter: 200 },
+            { type: 'text', text: "SYSTEM BOOT SEQUENCE INITIATED...", style: 'title', delayAfter: screenCharDelay },
+            { type: 'text', text: "LOADING AICyberLab OS v4.2 (Codename: 'NeonOctopus')...", delayAfter: screenCharDelay },
+            { type: 'text', text: "KERNEL_INFO: Profile_Data.sys // User: Mr.Snow", delayAfter: screenLineDelay },
+            { type: 'empty' },
+            { type: 'text', text: ">> ACCESSING USER PROFILE: MR. SNOW <<", style: 'highlight', delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'text', text: "Designation: Computer Science Educator (Primary Cycle)," },
+            { type: 'text', text: "             AI Systems Architect (Exploratory Cycle)." },
+            { type: 'text', text: "Status:      Full-spectrum AI Enthusiast & Developer.", delayAfter: screenLineDelay },
+            { type: 'empty' },
+            { type: 'text', text: "This AI Cyber Lab serves as a nexus for bleeding-edge" },
+            { type: 'text', text: "AI experimentation and educational module deployment." },
+            { type: 'text', text: "My focus lies at the intersection of artificial" },
+            { type: 'text', text: "intelligence and practical application, particularly" },
+            { type: 'text', text: "in crafting engaging learning experiences.", delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'text', text: "CORE DIRECTIVES:", style: 'title', delayAfter: screenLineDelay },
+            { type: 'text', text: "1. Demystify complex AI concepts for students," },
+            { type: 'text', text: "   fostering a new generation of AI-literate creators." },
+            { type: 'text', text: "2. Architect local AI solutions (Ollama, Docker, OpenWebUI)" },
+            { type: 'text', text: "   for enhanced, privacy-compliant (COPPA) education." },
+            { type: 'text', text: "3. Develop narrow, lesson-specific AI tutors (RAG-based)" },
+            { type: 'text', text: "   to guide learning and maintain student focus." },
+            { type: 'text', text: "4. Integrate AI workflows into STEM & Design curricula:" },
+            { type: 'text', text: "   - Chemistry: Gamified learning (Chem Balancer)." },
+            { type: 'text', text: "   - Business/eSports: AI-driven simulations (Game Studio Strategist)." },
+            { type: 'text', text: "   - Game Design: AI-assisted asset generation & mechanics (Flappy Zebra, Cyber-PunkMan)." },
+            { type: 'text', text: "5. Explore computational art & emergent systems:" },
+            { type: 'text', text: "   - Fractals (Mandelbrot/Julia): Visualizing infinity." },
+            { type: 'text', text: "   - Cellular Automata (Game of Life 2D/3D): Emergent complexity." },
+            { type: 'text', text: "   - AI Sentiment Visualization (Lava Lamp)." },
+            { type: 'text', text: "6. Push the boundaries of AI-assisted development to" },
+            { type: 'text', text: "   share the transformative potential of these technologies." , delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'text', text: "The projects cataloged herein are artifacts born of" },
+            { type: 'text', text: "a relentless curiosity, a commitment to pedagogical" },
+            { type: 'text', text: "innovation, and a deep-seated passion for architecting" },
+            { type: 'text', text: "the future—one algorithm, one simulation, one student" },
+            { type: 'text', text: "at a time.", delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'text', text: "Welcome to the AI Cyber Lab, Mr. Snow.", style: 'highlight'},
+            { type: 'text', text: "Let's interface with the digital unknown.", delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'text', text: "> System.out.println(\"Engage. Create. Inspire. Evolve.\");", style: 'command', delayAfter: screenCharDelay },
+            { type: 'empty' },
+            { type: 'prompt', text: "AWAITING_COMMAND > " }
+        ];
+
+        const screenContentEl = document.getElementById('screen-content');
+        const monitorScreenEl = document.getElementById('monitor-screen');
+        const retroLogoEl = document.getElementById('retro-logo');
+        let screenAnimationHasPlayed = false;
+
+        function typeTextOnScreen(lineElement, text, textSpan, cursorSpan, callback) {
+            let i = 0;
+            function typeChar() {
+                if (i < text.length) {
+                    textSpan.textContent += text.charAt(i);
+                    i++;
+                    monitorScreenEl.scrollTop = monitorScreenEl.scrollHeight; 
+                    setTimeout(typeChar, screenTypingSpeed);
+                } else {
+                    lineElement.classList.remove('typing-active');
+                    lineElement.appendChild(cursorSpan); 
+                    cursorSpan.style.display = 'none'; 
+                    if (callback) callback();
+                }
+            }
+            typeChar();
+        }
+
+        async function processScreenLine(index = 0) {
+            if (index >= aboutScreenContent.length || !screenContentEl) {
+                const lastLine = screenContentEl.querySelector('.prompt-active .blinking-cursor-screen');
+                if(lastLine) lastLine.style.display = 'inline-block';
+                return;
+            }
+
+            const item = aboutScreenContent[index];
+            const lineElement = document.createElement('div');
+            lineElement.classList.add('screen-line');
+
+            const textSpan = document.createElement('span'); 
+            textSpan.classList.add('line-text-content');
+            lineElement.appendChild(textSpan);
+            
+            const cursorSpan = document.createElement('span');
+            cursorSpan.classList.add('blinking-cursor-screen');
+            cursorSpan.innerHTML = "█"; 
+
+            if (item.delayBefore) await new Promise(resolve => setTimeout(resolve, item.delayBefore));
+
+            switch (item.type) {
+                case 'image':
+                    if (retroLogoEl) {
+                        retroLogoEl.style.display = 'block';
+                    }
+                    break;
+                case 'text':
+                    screenContentEl.appendChild(lineElement);
+                    if (item.style) lineElement.classList.add(`style-${item.style}`);
+                    
+                    lineElement.classList.add('typing-active');
+                    textSpan.appendChild(cursorSpan); 
+                    cursorSpan.style.display = 'inline-block';
+
+                    typeTextOnScreen(lineElement, item.text, textSpan, cursorSpan, async () => {
+                        if (item.delayAfter) await new Promise(resolve => setTimeout(resolve, item.delayAfter));
+                        processScreenLine(index + 1);
+                    });
+                    return; 
+                case 'empty':
+                    lineElement.classList.add('empty-line');
+                    screenContentEl.appendChild(lineElement);
+                    break;
+                case 'prompt':
+                    lineElement.classList.add('prompt-active'); 
+                    screenContentEl.appendChild(lineElement);
+                    textSpan.textContent = item.text;
+                    lineElement.appendChild(cursorSpan); 
+                    cursorSpan.style.display = 'inline-block';
+                    monitorScreenEl.scrollTop = monitorScreenEl.scrollHeight;
+                    break;
+            }
+            
+            if (item.delayAfter && item.type !== 'text') await new Promise(resolve => setTimeout(resolve, item.delayAfter));
+            if (item.type !== 'text') { 
+                 processScreenLine(index + 1);
+            }
+        }
+
+        function startScreenTypingAnimation() {
+            if (screenAnimationHasPlayed || !screenContentEl) return;
+            screenAnimationHasPlayed = true;
+            screenContentEl.innerHTML = ''; 
+            if (retroLogoEl) retroLogoEl.style.display = 'none'; 
+            processScreenLine();
+        }
+
+        const aboutSectionNode = document.getElementById('about');
+        const screenObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !screenAnimationHasPlayed) {
+                    startScreenTypingAnimation();
+                }
+            });
+        }, { threshold: 0.2 }); 
+
+        if (aboutSectionNode) {
+            screenObserver.observe(aboutSectionNode);
+        } else {
+            console.warn("'About' section for retro screen not found.");
+        }
+    </script>
+  </section>
+
+  <div class="japanese-neon-motif" id="japaneseMotif">
+    </div>
+  <footer id="footer-section"> 
+    <p>© <span id="currentYear"></span> AI Cyber Lab. All rights reserved.</p>
+    <p>Contact: <a href="mailto:info@ai-cyberlab.com">info@ai-cyberlab.com</a> | Follow us on <a href="https://x.com" target="_blank" rel="noopener noreferrer">X (formerly Twitter)</a></p>
+  </footer>
+
+  <script>
+    // --- Main Page Scripts (Hero Animations, etc.) ---
+    let pointText; 
+    let textContent = 'AI CYBER LAB'; 
+
+    window.onload = function () {
+        // --- Header Background Canvas Animation ---
+        const headerCanvas = document.getElementById('header-background-canvas');
+        const headerCtx = headerCanvas.getContext('2d');
+        let headerRainChars = "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン01"; 
+        headerRainChars = headerRainChars.split('');
+        let headerFontSize = 14; 
+        let headerColumns;
+        let headerDrops = [];
+
+        function resizeHeaderCanvas() {
+            headerCanvas.width = headerCanvas.offsetWidth;
+            headerCanvas.height = headerCanvas.offsetHeight;
+            headerColumns = Math.floor(headerCanvas.width / headerFontSize);
+            headerDrops = [];
+            for (let x = 0; x < headerColumns; x++) {
+                headerDrops[x] = 1 + Math.random() * headerCanvas.height / headerFontSize; 
+            }
+        }
+        resizeHeaderCanvas(); 
+
+        let lastHeaderRainTime = 0;
+        const headerRainInterval = 60; 
+
+        function drawHeaderRain(timestamp) {
+            requestAnimationFrame(drawHeaderRain);
+            if (timestamp - lastHeaderRainTime < headerRainInterval) {
+                return;
+            }
+            lastHeaderRainTime = timestamp;
+
+            headerCtx.fillStyle = 'rgba(8, 8, 10, 0.15)'; 
+            headerCtx.fillRect(0, 0, headerCanvas.width, headerCanvas.height);
+
+            headerCtx.fillStyle = '#00ff00'; 
+            headerCtx.font = headerFontSize + 'px VT323';
+
+            for (let i = 0; i < headerDrops.length; i++) {
+                const text = headerRainChars[Math.floor(Math.random() * headerRainChars.length)];
+                headerCtx.fillText(text, i * headerFontSize, headerDrops[i] * headerFontSize);
+
+                if (headerDrops[i] * headerFontSize > headerCanvas.height && Math.random() > 0.975) {
+                    headerDrops[i] = 0;
+                }
+                headerDrops[i]++;
+            }
+        }
+        requestAnimationFrame(drawHeaderRain); 
+        window.addEventListener('resize', resizeHeaderCanvas);
+
+
+        // --- Paper.js for 2D Neon Sign Text in Hero ---
+        var neonSignCanvas = document.getElementById('neon-sign');
+        if (neonSignCanvas) {
+            paper.setup(neonSignCanvas); 
+            pointText = new paper.PointText({ 
+                content: textContent,
+                fillColor: '#ff00ff', 
+                fontFamily: 'VT323',
+                fontWeight: 'bold', 
+                fontSize: paper.view.bounds.width / (textContent.length * 0.7), 
+                justification: 'center'
+            });
+            pointText.position = paper.view.center;
+
+            var flickerIntensity = 0.05; 
+            var maxOffset = 2; 
+
+            paper.view.onFrame = function(event) {
+                var newFontSize = paper.view.bounds.width / (textContent.length * 0.7);
+                if (newFontSize < 20) newFontSize = 20; 
+                if (newFontSize > 60) newFontSize = 60; 
+                pointText.fontSize = newFontSize;
+                pointText.position = paper.view.center; 
+
+                if (Math.random() < flickerIntensity) {
+                    pointText.position.x += (Math.random() - 0.5) * maxOffset;
+                    pointText.position.y += (Math.random() - 0.5) * maxOffset;
+                    pointText.opacity = 0.8 + Math.random() * 0.2;
+                    setTimeout(() => {
+                        pointText.position = paper.view.center;
+                        pointText.opacity = 1.0;
+                    }, 80 + Math.random() * 50); 
+                } else {
+                    if (pointText.opacity < 1) pointText.opacity = 1.0;
+                }
+            }
+            paper.view.draw();
+        } else {
+            console.error("Paper.js canvas 'neon-sign' not found.");
+        }
+
+        // --- Three.js for 3D Terminal Background in Hero ---
+        const heroCanvasContainer = document.getElementById('hero-canvas');
+        if (heroCanvasContainer) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, heroCanvasContainer.clientWidth / heroCanvasContainer.clientHeight, 0.1, 1000); 
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
+            renderer.setSize(heroCanvasContainer.clientWidth, heroCanvasContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio); 
+            heroCanvasContainer.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0x404040, 2); 
+            scene.add(ambientLight);
+            const pointLight1 = new THREE.PointLight(0x00ff00, 1.5, 150); 
+            pointLight1.position.set(-15, 10, 10);
+            scene.add(pointLight1);
+            const pointLight2 = new THREE.PointLight(0xff00ff, 1.5, 150); 
+            pointLight2.position.set(15, -10, 5);
+            scene.add(pointLight2);
+
+            const gridSize = 50;
+            const gridDivisions = 50;
+            const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x00ff00, 0x333333);
+            gridHelper.position.y = -5; 
+            scene.add(gridHelper);
+
+            const shapes = [];
+            const shapeTypes = [
+                () => new THREE.BoxGeometry(0.8, 0.8, 0.8),
+                () => new THREE.SphereGeometry(0.5, 16, 16),
+                () => new THREE.IcosahedronGeometry(0.6, 0),
+                () => new THREE.DodecahedronGeometry(0.6, 0),
+                () => new THREE.TorusKnotGeometry(0.4, 0.15, 100, 12),
+                () => new THREE.OctahedronGeometry(0.7, 0),
+                () => new THREE.TetrahedronGeometry(0.7, 0)
+            ];
+            const shapeMaterial = new THREE.MeshPhongMaterial({
+                color: 0x00ff00, 
+                wireframe: true,
+                emissive: 0x003300, 
+                specular: 0x00ff00,
+                shininess: 50
+            });
+
+            for (let i = 0; i < 50; i++) { 
+                const geometry = shapeTypes[Math.floor(Math.random() * shapeTypes.length)]();
+                const shape = new THREE.Mesh(geometry, shapeMaterial);
+                shape.position.set(
+                    (Math.random() - 0.5) * 30, 
+                    (Math.random() - 0.5) * 20, 
+                    (Math.random() - 0.5) * 30 - 15 
+                );
+                shape.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                shape.userData.rotationSpeed = {
+                    x: (Math.random() - 0.5) * 0.03, 
+                    y: (Math.random() - 0.5) * 0.03,
+                    z: (Math.random() - 0.5) * 0.015
+                };
+                scene.add(shape);
+                shapes.push(shape);
+            }
+
+            camera.position.set(0, 2, 15); 
+            camera.lookAt(scene.position); 
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; 
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = true; 
+            controls.minDistance = 2; 
+            controls.maxDistance = 40; 
+            controls.enablePan = true; 
+
+            heroCanvasContainer.addEventListener('mousedown', function(event) {
+                if (event.ctrlKey) {
+                    event.preventDefault(); 
+                    const zoomFactor = 1; 
+                    if (event.button === 0) { 
+                        camera.position.z = Math.max(controls.minDistance, camera.position.z - zoomFactor);
+                    } else if (event.button === 2) { 
+                        camera.position.z = Math.min(controls.maxDistance, camera.position.z + zoomFactor);
+                    }
+                }
+            });
+            heroCanvasContainer.addEventListener('contextmenu', function(event) {
+                if (event.ctrlKey) {
+                    event.preventDefault();
+                }
+            });
+
+
+            function animateThreeJs() {
+                requestAnimationFrame(animateThreeJs);
+                shapes.forEach(shape => {
+                    shape.rotation.x += shape.userData.rotationSpeed.x;
+                    shape.rotation.y += shape.userData.rotationSpeed.y;
+                    shape.rotation.z += shape.userData.rotationSpeed.z;
+                });
+                controls.update(); 
+                renderer.render(scene, camera);
+            }
+            animateThreeJs(); 
+
+            window.addEventListener('resize', () => {
+                if (heroCanvasContainer.clientWidth > 0 && heroCanvasContainer.clientHeight > 0) {
+                    camera.aspect = heroCanvasContainer.clientWidth / heroCanvasContainer.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(heroCanvasContainer.clientWidth, heroCanvasContainer.clientHeight);
+                }
+                if (neonSignCanvas && paper.view && pointText) { 
+                    paper.view.viewSize = new paper.Size(neonSignCanvas.offsetWidth, neonSignCanvas.offsetHeight);
+                    var newFontSize = paper.view.bounds.width / (textContent.length * 0.7); 
+                    if (newFontSize < 20) newFontSize = 20;
+                    if (newFontSize > 60) newFontSize = 60;
+                    pointText.fontSize = newFontSize;
+                    pointText.position = paper.view.center;
+                }
+            }, false);
+        } else {
+            console.error("Three.js canvas container 'hero-canvas' not found.");
+        }
+
+        const currentYearElement = document.getElementById('currentYear');
+        if (currentYearElement) {
+            currentYearElement.textContent = new Date().getFullYear();
+        }
+
+        // --- Project Hub Navigation Script ---
+        const projectCards = document.querySelectorAll('.project-card');
+        const projectWindows = document.querySelectorAll('#projects > .window'); 
+        const projectHubInterface = document.getElementById('project-hub-interface');
+        const projectsSectionTitle = document.querySelector('#projects .projects-section-title');
+
+        function openProjectWindow(targetProjectId) {
+            if (projectHubInterface) {
+                projectHubInterface.style.display = 'none';
+            }
+            if(projectsSectionTitle) {
+                projectsSectionTitle.style.display = 'none'; 
+            }
+            projectWindows.forEach(pw => pw.classList.remove('active'));
+            const targetWindow = document.getElementById(targetProjectId);
+            if (targetWindow) {
+                targetWindow.classList.add('active');
+                const firstFocusableElement = targetWindow.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (firstFocusableElement) {
+                    firstFocusableElement.focus();
+                }
+            }
+        }
+
+        projectCards.forEach(card => {
+            card.addEventListener('click', () => {
+                openProjectWindow(card.getAttribute('data-target-project'));
+            });
+            card.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault(); 
+                    openProjectWindow(card.getAttribute('data-target-project'));
+                }
+            });
+        });
+
+        document.querySelectorAll('.back-to-hub-button').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('.window').classList.remove('active');
+                
+                if (projectHubInterface) {
+                    projectHubInterface.style.display = 'grid'; 
+                    if(projectsSectionTitle) {
+                        projectsSectionTitle.style.display = 'block'; 
+                    }
+                }
+            });
+        });
+
+        // --- Japanese Motif Flicker Script ---
+        const japaneseMotifEl = document.getElementById('japaneseMotif');
+        if (japaneseMotifEl) {
+            const originalText = "人工知能サイバーラボ";
+            japaneseMotifEl.innerHTML = ''; 
+            const chars = originalText.split('');
+            chars.forEach(char => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                japaneseMotifEl.appendChild(span);
+            });
+
+            const charSpans = japaneseMotifEl.querySelectorAll('span');
+            const baseShadow = "0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff";
+            const flickerShadows = [
+                "0 0 2px #ff00ff, 0 0 5px #ff00ff, 0 0 8px #ff00ff", 
+                "0 0 7px #ff00ff, 0 0 12px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff", 
+                "0 0 4px #ff00ff, 0 0 8px #ff00ff", 
+                baseShadow 
+            ];
+
+            function randomFlicker() {
+                charSpans.forEach(span => {
+                    if (Math.random() < 0.15) { 
+                        const randomShadow = flickerShadows[Math.floor(Math.random() * flickerShadows.length)];
+                        span.style.textShadow = randomShadow;
+                        span.style.opacity = Math.random() * 0.3 + 0.7; 
+                    } else {
+                        span.style.textShadow = baseShadow;
+                        span.style.opacity = 1;
+                    }
+                });
+                setTimeout(randomFlicker, Math.random() * 250 + 80); 
+            }
+            randomFlicker(); 
+        }
+    }; 
+  </script>
+</body>
+</html>

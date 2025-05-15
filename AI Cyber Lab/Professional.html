@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Name - AI Developer & Educator</title>
+  <style>
+    /* --- Base & Reset --- */
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+      --light-text: #f8f9fa;
+      --border-color: #dee2e6;
+      --card-bg: #ffffff;
+      --shadow-sm: 0 .125rem .25rem rgba(0, 0, 0, .075);
+      --shadow-md: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      background-color: var(--light-bg);
+      color: var(--dark-text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* --- Utility --- */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    section {
+      padding: 4rem 0;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 1rem;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    h1 { font-size: 2.5rem; color: var(--primary-color); }
+    h2 { font-size: 2rem; text-align: center; margin-bottom: 2.5rem; color: var(--dark-text); }
+    h3 { font-size: 1.5rem; color: var(--primary-color); }
+
+    p { margin-bottom: 1rem; }
+    a { color: var(--primary-color); text-decoration: none; transition: color 0.2s ease; }
+    a:hover { color: #0a58ca; text-decoration: underline; }
+
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* --- Header --- */
+    .site-header {
+      background-color: var(--card-bg);
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .site-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark-text);
+      text-decoration: none;
+    }
+    .site-title:hover { text-decoration: none; color: var(--primary-color); }
+
+    .main-nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .main-nav a {
+      text-decoration: none;
+      color: var(--secondary-color);
+      font-weight: 500;
+      padding: 0.5rem 0;
+    }
+
+    .main-nav a:hover,
+    .main-nav a.active { /* Add .active class via JS based on scroll */
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    /* --- Hero Section --- */
+    #hero {
+      background-color: var(--card-bg);
+      text-align: center;
+      padding: 5rem 0;
+    }
+    #hero h1 { margin-bottom: 0.5rem; }
+    #hero .subtitle {
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+        margin-bottom: 1.5rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        text-align: center;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        text-decoration: none;
+    }
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: var(--light-text);
+    }
+    .btn-primary:hover {
+        background-color: #0a58ca;
+        color: var(--light-text);
+        text-decoration: none;
+        box-shadow: var(--shadow-sm);
+    }
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: var(--light-text);
+    }
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        color: var(--light-text);
+        text-decoration: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* --- Projects Section --- */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .project-card h3 { margin-top: 0; font-size: 1.25rem; margin-bottom: 0.75rem; }
+    .project-description {
+        font-size: 0.95rem;
+        color: var(--secondary-color);
+        flex-grow: 1; /* Pushes the button down */
+        margin-bottom: 1rem;
+    }
+    .view-details-btn {
+        align-self: flex-start; /* Align button to the start */
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-top: auto; /* Pushes button to bottom if description is short */
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+    .view-details-btn::after {
+        content: ' →';
+    }
+    .view-details-btn:hover { text-decoration: underline; }
+
+
+    /* --- Project Modal --- */
+    .project-modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.6);
+        align-items: center; /* Vertically center */
+        justify-content: center; /* Horizontally center */
+    }
+
+    .project-modal.active {
+        display: flex; /* Use flex to center content */
+    }
+
+    .modal-content {
+        background-color: var(--card-bg);
+        margin: auto; /* Helps with centering */
+        padding: 2rem;
+        border-radius: 0.5rem;
+        width: 90%;
+        max-width: 950px; /* Max width of modal */
+        max-height: 90vh; /* Max height */
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        box-shadow: var(--shadow-md);
+        animation: fadeInModal 0.3s ease-out;
+    }
+
+    @keyframes fadeInModal {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    .modal-header h2 {
+        font-size: 1.75rem;
+        text-align: left;
+        margin-bottom: 0;
+        color: var(--primary-color);
+    }
+    .modal-close-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        font-weight: 300;
+        color: var(--secondary-color);
+        cursor: pointer;
+        padding: 0 0.5rem;
+        line-height: 1;
+    }
+    .modal-close-btn:hover { color: var(--dark-text); }
+
+    .modal-body {
+        overflow-y: auto; /* Allow scrolling if content overflows */
+        flex-grow: 1; /* Takes available space */
+    }
+
+    .iframe-container {
+        width: 100%;
+        height: 500px; /* Default iframe height */
+        border: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+        background-color: #eee; /* Placeholder bg */
+        border-radius: 0.25rem;
+        overflow: hidden; /* Ensures border-radius applies */
+    }
+    .iframe-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block; /* Removes potential bottom space */
+    }
+    /* Adjust iframe heights if needed, keep the original project specific heights for now */
+    .lavalamp-iframe-container { height: 600px; }
+    .gameoflife-iframe-container { height: 650px; }
+    .gameoflife3d-iframe-container { height: 700px; }
+    .cyberpunkman-iframe-container { height: 550px; }
+    .flappyzebra-iframe-container { height: 500px; }
+    .fractal-explorer-iframe-container { height: 600px; }
+    .gamestudio-iframe-container { height: 650px; }
+    .chemgame-iframe-container { height: 600px; }
+
+    .modal-footer {
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        text-align: right;
+    }
+
+    .project-link-button {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        background-color: var(--primary-color);
+        color: var(--light-text);
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+    }
+    .project-link-button:hover {
+        background-color: #0a58ca;
+        color: var(--light-text);
+        text-decoration: none;
+    }
+
+    /* --- About Section --- */
+    #about { background-color: var(--card-bg); }
+    .about-content {
+        display: grid;
+        grid-template-columns: 1fr; /* Default single column */
+        gap: 2rem;
+    }
+    @media (min-width: 768px) { /* Two columns on medium screens and up */
+        .about-content {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    .skills-list {
+        list-style: none;
+        padding-left: 0;
+    }
+    .skills-list h4 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--dark-text); }
+    .skills-list ul {
+        list-style: none;
+        padding-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .skills-list li {
+        background-color: var(--light-bg);
+        color: var(--secondary-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        border: 1px solid var(--border-color);
+    }
+
+    /* --- Contact Section --- */
+    #contact p { text-align: center; font-size: 1.1rem; color: var(--secondary-color); }
+    .contact-links {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        font-size: 1.2rem; /* Size of the links/icons */
+    }
+    /* Add styles for icons if you use an icon library */
+
+    /* --- Footer --- */
+    .site-footer {
+      background-color: #e9ecef; /* Slightly darker than light-bg */
+      padding: 1.5rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto; /* Pushes footer to bottom */
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.75rem; }
+        .container { padding-left: 1rem; padding-right: 1rem; }
+        section { padding: 3rem 0; }
+        .header-content { flex-direction: column; gap: 0.5rem; }
+        .main-nav ul { gap: 1rem; justify-content: center; }
+        .hero-buttons { flex-direction: column; align-items: center; gap: 0.75rem; }
+        .btn { width: 80%; max-width: 300px;}
+        .project-grid { grid-template-columns: 1fr; } /* Single column on mobile */
+        .modal-content { width: 95%; padding: 1.5rem; }
+        .modal-header h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="#" class="site-title">Your Name</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="#hero" class="active">Home</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#about">About / Skills</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section id="hero">
+      <div class="container">
+        <h1>Your Name</h1>
+        <p class="subtitle">AI Developer & Computer Science Educator | Bridging AI Advancements with Practical Educational Applications</p>
+        <p>Passionate about leveraging artificial intelligence to create engaging, effective, and accessible learning tools. Experienced in local AI deployment, RAG implementation, and developing interactive web applications for education.</p>
+        <div class="hero-buttons">
+          <a href="#projects" class="btn btn-primary">View My Projects</a>
+          <a href="#about" class="btn btn-secondary">Learn More About Me</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="container">
+        <h2>Featured Projects</h2>
+        <div class="project-grid" id="project-hub-interface">
+          <!-- Project Cards - Content Updated for Resume Tone -->
+          <div class="project-card" data-target-project="fractal-explorer-window" tabindex="0">
+            <h3>Interactive Fractal Explorer</h3>
+            <p class="project-description">
+              Developed an interactive visualization tool for Mandelbrot and Julia sets to teach complex numbers and iterative processes. Features dynamic generation based on user interaction and color mapping based on escape-time algorithms. Tech: JavaScript, HTML5 Canvas.
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+          <div class="project-card" data-target-project="gol-2d-window" tabindex="0">
+            <h3>Conway's Game of Life (2D Simulation)</h3>
+            <p class="project-description">
+              Implemented Conway's Game of Life in 2D to demonstrate cellular automata and emergent complexity. Allows rule customization and pattern seeding. Used as a teaching tool for computation fundamentals and self-organization concepts. Tech: JavaScript, p5.js/Canvas.
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+           <div class="project-card" data-target-project="gol-3d-window" tabindex="0">
+            <h3>Conway's Game of Life (3D Visualization)</h3>
+            <p class="project-description">
+              Extended the Game of Life concept into a 3D grid, visualizing complex spatial patterns and emergent behavior in three dimensions. Explores computational modeling of 3D systems. Tech: JavaScript, Three.js (WebGL).
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+          <div class="project-card" data-target-project="lava-lamp-window" tabindex="0">
+            <h3>AI Sentiment Visualization (Lava Lamp)</h3>
+            <p class="project-description">
+              Created a real-time visualization translating the sentiment analysis output of a local AI (running on RTX 3090) into fluid dynamics. Explores non-traditional data representation and ambient feedback. Tech: JavaScript, WebGL (custom shaders or library), Backend AI Integration.
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+          <div class="project-card" data-target-project="game-studio-window" tabindex="0">
+            <h3>AI-Enhanced Game Studio Simulation</h3>
+            <p class="project-description">
+              Designed an educational simulation for Game Design/eSports students using AI-generated scenarios and decision trees. Teaches business strategy in game development within a dynamic, AI-influenced market. Tech: JavaScript, AI Integration (Scenario Generation).
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+          <div class="project-card" data-target-project="chem-balancer-window" tabindex="0">
+            <h3>AI-Assisted Chemistry Equation Balancer</h3>
+            <p class="project-description">
+              Developed a gamified learning tool integrating a local RAG-based AI (Gemma2:2b) to assist students in balancing chemical equations, providing contextual feedback and explanations based on curriculum. Tech: JavaScript, HTML/CSS, Local AI (Ollama/Docker), RAG.
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+           <div class="project-card" data-target-project="cyberpunkman-window" tabindex="0">
+            <h3>AI in Game Development Workflow (Cyber-PunkMan)</h3>
+            <p class="project-description">
+               Reimagined a classic arcade game, using the development process to teach AI workflow integration (e.g., asset generation, potential dynamic difficulty adjustment) alongside game development fundamentals. Tech: JavaScript, p5.js/Canvas, AI Tools (for assets/ideation).
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+          <div class="project-card" data-target-project="flappy-zebra-window" tabindex="0">
+            <h3>Introductory Game Dev & AI Workflow (Flappy Zebra)</h3>
+            <p class="project-description">
+              Co-created a simple arcade game with students to teach p5.js, event handling, and basic physics simulation, while introducing concepts of AI workflow integration (asset creation, difficulty scaling). Tech: JavaScript, p5.js.
+            </p>
+            <button class="view-details-btn">View Details</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Project Modals (Structure remains similar, content reference via ID) -->
+    <div class="project-modal" id="fractal-explorer-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Interactive Fractal Explorer</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container fractal-explorer-iframe-container">
+                    <iframe src="/Mandelbrot2.html" title="Interactive Fractal Explorer" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>This tool allows exploration of the Mandelbrot set. Clicking generates the corresponding Julia set. Used for teaching complex plane visualization and the concept of infinity in mathematics.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="/Mandelbrot2.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="gol-2d-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Conway's Game of Life (2D Simulation)</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container gameoflife-iframe-container">
+                    <iframe src="/GOL_2.html" title="Conway's Game of Life (2D Simulation)" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>A classic simulation demonstrating how simple rules lead to complex emergent behavior. Users can draw initial states or seed known patterns.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/GOL_2.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="gol-3d-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Conway's Game of Life (3D Visualization)</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container gameoflife3d-iframe-container">
+                    <iframe src="/GOL3d_3.html" title="Conway's Game of Life (3D Visualization)" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>Extends the cellular automata concept to three dimensions, allowing exploration of complex spatial structures evolving over time.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/GOL3d_3.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="lava-lamp-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI Sentiment Visualization (Lava Lamp)</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container lavalamp-iframe-container">
+                    <iframe src="/viz_LavaLamp.html" title="AI Sentiment Visualization (Lava Lamp)" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>Visualizes real-time sentiment analysis from a local AI using fluid dynamics simulation, mapping emotions to color and blob behavior.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/viz_LavaLamp.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="game-studio-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI-Enhanced Game Studio Simulation</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container gamestudio-iframe-container">
+                    <iframe src="/Game Studio Strategist.html" title="AI-Enhanced Game Studio Simulation" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>An educational simulation where players manage a game studio. AI generates dynamic market events and complex scenarios to challenge strategic decision-making.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/Game Studio Strategist.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="chem-balancer-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI-Assisted Chemistry Equation Balancer</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container chemgame-iframe-container">
+                    <iframe src="/Chem Game.html" title="AI-Assisted Chemistry Equation Balancer" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>Gamified practice for stoichiometry, featuring an integrated local AI tutor (RAG implementation) providing hints and explanations aligned with lesson plans.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/Chem Game.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="cyberpunkman-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI in Game Development Workflow (Cyber-PunkMan)</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container cyberpunkman-iframe-container">
+                    <iframe src="/Punkman.html" title="AI in Game Development Workflow (Cyber-PunkMan)" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>A practical example used to teach students how AI can be integrated into game development for tasks like asset generation or ideation, built around a simple arcade game.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="/Punkman.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+
+     <div class="project-modal" id="flappy-zebra-window">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Introductory Game Dev & AI Workflow (Flappy Zebra)</h2>
+                <button class="modal-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="iframe-container flappyzebra-iframe-container">
+                    <iframe src="Flappy Zebra\FlappyZebra.html" title="Introductory Game Dev & AI Workflow (Flappy Zebra)" scrolling="no" loading="lazy"></iframe>
+                </div>
+                <p>An introductory project teaching game development basics (physics, events) with p5.js, also serving as a discussion point for AI workflow integrations in student projects.</p>
+            </div>
+             <div class="modal-footer">
+                <a href="Flappy Zebra\FlappyZebra.html" target="_blank" class="project-link-button">Open Project in New Tab &gt;&gt;</a>
+            </div>
+        </div>
+    </div>
+    <!-- End Project Modals -->
+
+
+    <section id="about">
+      <div class="container">
+        <h2>About Me / Skills</h2>
+        <div class="about-content">
+          <div>
+            <h3>Professional Summary</h3>
+            <p>Innovative Computer Science Educator and AI Developer with a strong focus on integrating cutting-edge AI technologies into educational frameworks. Proven ability to design, develop, and deploy practical AI-driven tools that enhance learning engagement and effectiveness. Committed to fostering AI literacy and computational thinking in students, while ensuring safe and ethical implementation through local deployment and data privacy practices.</p>
+            <h3>Educational Philosophy</h3>
+            <p>I believe AI should serve as a powerful amplifier for both educators and students. My goal is to create tools that augment teaching capabilities, provide personalized student support, make abstract concepts tangible, and ultimately prepare learners for a future increasingly shaped by artificial intelligence. Empowerment, safety, and curiosity are core tenets of my approach.</p>
+          </div>
+          <div>
+            <h3>Core Competencies & Technical Skills</h3>
+            <div class="skills-list">
+              <h4>AI & Machine Learning</h4>
+              <ul>
+                <li>Local LLM Deployment (Ollama)</li>
+                <li>Retrieval-Augmented Generation (RAG)</li>
+                <li>AI Workflow Integration</li>
+                <li>Sentiment Analysis</li>
+                <li>AI Ethics in Education</li>
+                <li>Prompt Engineering</li>
+              </ul>
+              <h4>Web Development & Visualization</h4>
+              <ul>
+                <li>JavaScript (ES6+)</li>
+                <li>HTML5</li>
+                <li>CSS3</li>
+                <li>p5.js</li>
+                <li>Three.js (WebGL)</li>
+                <li>Canvas API</li>
+                <li>Responsive Design</li>
+              </ul>
+              <h4>Tools & Platforms</h4>
+              <ul>
+                <li>Docker</li>
+                <li>Git / GitHub</li>
+                <li>OpenWebUI</li>
+                <li>Linux Environment</li>
+                <li>NVIDIA GPUs (for local AI)</li>
+              </ul>
+               <h4>Pedagogy & Education</h4>
+              <ul>
+                <li>Curriculum Development</li>
+                <li>Educational Technology Integration</li>
+                <li>Gamification</li>
+                <li>Computational Thinking Instruction</li>
+                <li>Student Project Guidance</li>
+                <li>COPPA Compliance Awareness</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <h2>Get In Touch</h2>
+        <p>Interested in collaborating or learning more about my work? Reach out:</p>
+        <div class="contact-links">
+          <a href="mailto:your.email@example.com">Email</a>
+          <a href="https://linkedin.com/in/yourlinkedinprofile" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/yourgithubprofile" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <!-- Add icons here if desired -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="currentYear"></span> Your Name. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Dynamic Year
+      const currentYearElement = document.getElementById('currentYear');
+      if (currentYearElement) {
+        currentYearElement.textContent = new Date().getFullYear();
+      }
+
+      // Project Modal Logic
+      const projectCards = document.querySelectorAll('.project-card');
+      const modals = document.querySelectorAll('.project-modal');
+      const closeButtons = document.querySelectorAll('.modal-close-btn');
+
+      function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+      }
+
+      function closeModal(modal) {
+         if (modal) {
+          modal.classList.remove('active');
+          // Optional: Stop iframe content if needed
+          const iframe = modal.querySelector('iframe');
+          if (iframe) {
+              iframe.src = iframe.src; // Reloads iframe, effectively stopping some content
+          }
+          // Only restore scroll if no other modals are active (though unlikely in this setup)
+          if (!document.querySelector('.project-modal.active')) {
+              document.body.style.overflow = '';
+          }
+        }
+      }
+
+      projectCards.forEach(card => {
+        const targetId = card.getAttribute('data-target-project');
+        // Open via card click or button click inside card
+        card.addEventListener('click', (e) => {
+            // Allow clicking the external link btn inside modal without closing
+            if (!e.target.closest('a')) {
+                 openModal(targetId);
+            }
+        });
+         card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openModal(targetId);
+            }
+         });
+      });
+
+      closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          closeModal(button.closest('.project-modal'));
+        });
+      });
+
+      // Close modal if clicking outside the modal content
+      modals.forEach(modal => {
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) { // Check if click is on the backdrop
+            closeModal(modal);
+          }
+        });
+      });
+
+        // Close modal with Escape key
+      document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                const activeModal = document.querySelector('.project-modal.active');
+                if (activeModal) {
+                    closeModal(activeModal);
+                }
+            }
+        });
+
+        // Basic Active Nav Link Highlighting (Optional Enhancement)
+        const navLinks = document.querySelectorAll('.main-nav a');
+        const sections = document.querySelectorAll('section[id]'); // Assumes sections have IDs matching nav hrefs
+
+        const observerOptions = {
+            root: null, // viewport
+            rootMargin: '0px',
+            threshold: 0.4 // % of section visible
+        };
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                const navLink = document.querySelector(`.main-nav a[href="#${entry.target.id}"]`);
+                if (entry.isIntersecting && navLink) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    navLink.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(sec => observer.observe(sec));
+
+    });
+  </script>
+
+</body>
+</html>

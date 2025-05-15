@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's 3D Game of Life - Enhanced</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+            background-color: #111;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #container {
+            width: 90vw;
+            height: 65vh; /* Adjusted for more controls */
+            margin-top: 5px;
+            border: 1px solid #555;
+            position: relative;
+        }
+        h1 {
+            margin: 10px 0 5px 0;
+            color: #eee;
+            text-align: center;
+        }
+        .controls-main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90vw;
+            max-width: 1000px; /* Max width for all controls */
+            overflow-y: auto; /* Allow scrolling for controls if too many */
+            max-height: calc(35vh - 70px); /* Remaining height for controls */
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .controls-section {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: rgba(30, 30, 30, 0.8);
+            width: 100%;
+            max-width: 700px; /* Max width for individual sections */
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .controls-section strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1em;
+            color: #ccc;
+        }
+        .control-group {
+            margin-bottom: 5px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .control-group label {
+            margin-right: 3px;
+        }
+
+        button, label, input, select, span {
+            margin: 3px 4px;
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 1px solid #777;
+            background-color: #444;
+            color: #eee;
+            vertical-align: middle;
+        }
+        input[type="text"], input[type="number"] {
+            width: 45px;
+            text-align: center;
+            padding: 6px;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 2px;
+            transform: scale(0.9);
+        }
+        button:hover { background-color: #555; }
+        button:active { background-color: #666; }
+        button:disabled { cursor: not-allowed; opacity: 0.5; background-color: #333;}
+        
+        input[type="range"] { cursor: grab; vertical-align: middle; }
+        input[type="range"]:active { cursor: grabbing; }
+        
+        #speedValue, #gridSizeValue {
+            font-weight: bold; min-width: 20px; display: inline-block;
+            text-align: right; background: none; border: none; padding: 0;
+        }
+        .info-display {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #aaa;
+            text-align: center;
+            width: 100%;
+        }
+        .info-display p { margin: 2px 0; }
+
+        .seed-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+         .seed-buttons-container button {
+             flex-basis: calc(33.33% - 10px); /* Adjust as needed */
+             margin: 4px;
+         }
+        @media (max-width: 600px) {
+            .seed-buttons-container button {
+                flex-basis: calc(50% - 10px);
+            }
+            .control-group { width: 90%; text-align: left; }
+            .control-group label { display: inline-block; min-width: 80px;}
+        }
+    </style>
+</head>
+<body>
+    <h1>Conway's 3D Game of Life</h1>
+    <div id="container"></div>
+
+    <div class="controls-main-container">
+        <div class="controls-section">
+            <strong>Simulation Controls</strong>
+            <button id="startPauseButton">Start</button>
+            <button id="stepButton" disabled>Step</button>
+            <button id="randomizeButton">Randomize</button>
+            <button id="clearButton">Clear</button>
+            <button id="resetViewButton">Reset View</button>
+            <br>
+            <label for="speedSlider">Speed:</label>
+            <input type="range" id="speedSlider" min="50" max="1000" value="250" step="50">
+            <span id="speedValue">250</span> ms
+        </div>
+
+        <div class="controls-section">
+            <strong>Grid & Appearance</strong>
+            <div class="control-group">
+                <label for="gridSizeInput">Grid Size:</label>
+                <input type="number" id="gridSizeInput" min="5" max="25" value="15">
+                <button id="applyGridSizeButton">Apply Size</button>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="deathByAgeCheckbox">
+                <label for="deathByAgeCheckbox">Death by Old Age (Max: <span id="maxAgeDisplay">50</span>)</label>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <strong>Game Rules (B/S Notation for 3D)</strong>
+            <div class="control-group">
+                <label for="birthRuleInput">Birth (B):</label>
+                <input type="text" id="birthRuleInput" value="5">
+            </div>
+            <div class="control-group">
+                <label for="survivalRuleInput">Survival (S):</label>
+                <input type="text" id="survivalRuleInput" value="4,5">
+            </div>
+            <button id="applyRulesButton">Apply Rules</button>
+        </div>
+
+        <div class="controls-section">
+            <strong>Seed Patterns (3D)</strong>
+            <div class="seed-buttons-container">
+                <button id="seedCube2Button">2³ Cube</button>
+                <button id="seedCube3Button">3³ Cube</button>
+                <button id="seedSphere3Button">Sphere (r~3)</button>
+                <button id="seedRandomClusterButton">Random 5³ Cluster</button>
+                <button id="seedRodButton">Rod (1x1x5)</button>
+                <button id="seedPlaneButton">Plane (5x5x1)</button>
+            </div>
+        </div>
+         <div class="info-display">
+            <p id="rules-display">Current Rules: B5/S4,5</p>
+            <p id="generation-counter">Generation: 0</p>
+            <p>Mouse: Rotate (LMB drag), Pan (RMB drag), Zoom (scroll).</p>
+        </div>
+    </div>
+
+    <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Constants and Global Variables ---
+        let GRID_SIZE = 15;          // Default size, will be updated by input
+        const CELL_SIZE = 1.0;       // Logical size of a cell
+        const CELL_SPACING = 0.2;    // Spacing between cubes
+        const CUBE_DIM = CELL_SIZE - CELL_SPACING;
+        const MAX_AGE = 50;          // For color gradient and optional death
+        let enableDeathByAge = false;
+
+        let scene, camera, renderer, controls;
+        let grid;                   // 3D array for cell states (0 or 1)
+        let cellAgeGrid;            // 3D array for cell age
+        let cubes;                  // 3D array for cube meshes
+        
+        let isRunning = false;
+        let generation = 0;
+        let simulationIntervalId = null;
+        let simulationDelay = 250;
+
+        // Default 3D rules: B5/S4,5 (adjust as preferred, e.g., B5678/S5678 for "Clouds")
+        let birthRules = [5];
+        let survivalRules = [4, 5];
+
+        let initialCameraPosition, initialControlsTarget;
+
+        // DOM Elements
+        let startPauseButton, stepButton, randomizeButton, clearButton, resetViewButton, speedSlider, speedValueSpan;
+        let gridSizeInput, applyGridSizeButton, deathByAgeCheckbox, maxAgeDisplaySpan;
+        let birthRuleInput, survivalRuleInput, applyRulesButton;
+        const container = document.getElementById('container');
+        const generationDisplay = document.getElementById('generation-counter');
+        const rulesDisplay = document.getElementById('rules-display');
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+
+            const aspect = container.clientWidth / container.clientHeight;
+            camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xcccccc, 0.7);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(1, 1, 0.75).normalize();
+            scene.add(directionalLight);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            setupGridAndVisuals(); // Includes setting camera based on GRID_SIZE
+            
+            getControlElements();
+            addEventListeners();
+            
+            updateButtonStates();
+            updateSpeedDisplay();
+            updateGenerationDisplay();
+            updateRulesDisplayDOM();
+            maxAgeDisplaySpan.textContent = MAX_AGE;
+
+            animate();
+            console.log("3D Game of Life Initialized.");
+        }
+
+        function setupGridAndVisuals() {
+            // Clear existing cubes if any (for re-initialization)
+            if (cubes) {
+                for (let x = 0; x < cubes.length; x++) {
+                    for (let y = 0; y < cubes[x].length; y++) {
+                        for (let z = 0; z < cubes[x][y].length; z++) {
+                            if(cubes[x][y][z]) scene.remove(cubes[x][y][z]);
+                        }
+                    }
+                }
+            }
+
+            grid = make3DArray(GRID_SIZE, 0);
+            cellAgeGrid = make3DArray(GRID_SIZE, 0);
+            cubes = make3DArray(GRID_SIZE, null);
+
+            createVisualGrid();
+            randomizeGridData(); // Start with random data
+
+            // Update camera position and target based on new GRID_SIZE
+            const centerOffset = (GRID_SIZE * CELL_SIZE) / 2 - CELL_SIZE / 2;
+            initialCameraPosition = new THREE.Vector3(centerOffset, centerOffset * 0.8, GRID_SIZE * CELL_SIZE * 1.4);
+            initialControlsTarget = new THREE.Vector3(centerOffset, centerOffset, centerOffset);
+            resetCameraView(); // Applies initial position and updates controls target
+        }
+
+        function make3DArray(size, fillValue = 0) {
+            return Array.from({ length: size }, () =>
+                Array.from({ length: size }, () =>
+                    new Array(size).fill(fillValue)
+                )
+            );
+        }
+
+        function createVisualGrid() {
+            const geometry = new THREE.BoxGeometry(CUBE_DIM, CUBE_DIM, CUBE_DIM);
+            const centerOffset = (GRID_SIZE * CELL_SIZE) / 2 - CELL_SIZE / 2;
+
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let z = 0; z < GRID_SIZE; z++) {
+                        const material = new THREE.MeshStandardMaterial({
+                            color: 0xffffff, metalness: 0.1, roughness: 0.8,
+                            transparent: true, opacity: 0.9
+                        });
+                        const cube = new THREE.Mesh(geometry, material);
+                        cube.position.set(
+                            x * CELL_SIZE - centerOffset,
+                            y * CELL_SIZE - centerOffset,
+                            z * CELL_SIZE - centerOffset
+                        );
+                        cube.visible = false;
+                        scene.add(cube);
+                        cubes[x][y][z] = cube;
+                    }
+                }
+            }
+        }
+        
+        function getControlElements() {
+            startPauseButton = document.getElementById('startPauseButton');
+            stepButton = document.getElementById('stepButton');
+            randomizeButton = document.getElementById('randomizeButton');
+            clearButton = document.getElementById('clearButton');
+            resetViewButton = document.getElementById('resetViewButton');
+            speedSlider = document.getElementById('speedSlider');
+            speedValueSpan = document.getElementById('speedValue');
+
+            gridSizeInput = document.getElementById('gridSizeInput');
+            gridSizeInput.value = GRID_SIZE;
+            applyGridSizeButton = document.getElementById('applyGridSizeButton');
+            deathByAgeCheckbox = document.getElementById('deathByAgeCheckbox');
+            maxAgeDisplaySpan = document.getElementById('maxAgeDisplay');
+
+            birthRuleInput = document.getElementById('birthRuleInput');
+            survivalRuleInput = document.getElementById('survivalRuleInput');
+            applyRulesButton = document.getElementById('applyRulesButton');
+            birthRuleInput.value = birthRules.join(',');
+            survivalRuleInput.value = survivalRules.join(',');
+        }
+
+        function addEventListeners() {
+            startPauseButton.addEventListener('click', toggleRunning);
+            stepButton.addEventListener('click', stepSimulation);
+            randomizeButton.addEventListener('click', handleRandomize);
+            clearButton.addEventListener('click', handleClear);
+            resetViewButton.addEventListener('click', resetCameraView);
+            speedSlider.addEventListener('input', handleSpeedChange);
+
+            applyGridSizeButton.addEventListener('click', handleGridSizeChange);
+            deathByAgeCheckbox.addEventListener('change', () => {
+                enableDeathByAge = deathByAgeCheckbox.checked;
+            });
+            applyRulesButton.addEventListener('click', handleRuleChange);
+            
+            // Seed pattern buttons
+            document.getElementById('seedCube2Button').addEventListener('click', () => seedPreset('cube', 2));
+            document.getElementById('seedCube3Button').addEventListener('click', () => seedPreset('cube', 3));
+            document.getElementById('seedSphere3Button').addEventListener('click', () => seedPreset('sphere', 3));
+            document.getElementById('seedRandomClusterButton').addEventListener('click', () => seedPreset('randomCluster', 5));
+            document.getElementById('seedRodButton').addEventListener('click', () => seedPreset('rod', 5));
+            document.getElementById('seedPlaneButton').addEventListener('click', () => seedPreset('plane', 5));
+
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- Simulation Logic ---
+        function resetSimulationState() {
+            generation = 0;
+            grid = make3DArray(GRID_SIZE, 0);
+            cellAgeGrid = make3DArray(GRID_SIZE, 0);
+        }
+
+        function randomizeGridData() {
+            resetSimulationState();
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let z = 0; z < GRID_SIZE; z++) {
+                        if (Math.random() < 0.2) { // ~20% chance alive
+                            grid[x][y][z] = 1;
+                            cellAgeGrid[x][y][z] = 1;
+                        }
+                    }
+                }
+            }
+            updateVisualization();
+            updateGenerationDisplay();
+        }
+
+        function clearGridData() {
+            resetSimulationState();
+            updateVisualization();
+            updateGenerationDisplay();
+        }
+
+        function countNeighbors(x, y, z) {
+            let sum = 0;
+            for (let i = -1; i < 2; i++) {
+                for (let j = -1; j < 2; j++) {
+                    for (let k = -1; k < 2; k++) {
+                        if (i === 0 && j === 0 && k === 0) continue;
+                        let col = (x + i + GRID_SIZE) % GRID_SIZE;
+                        let row = (y + j + GRID_SIZE) % GRID_SIZE;
+                        let dep = (z + k + GRID_SIZE) % GRID_SIZE;
+                        sum += grid[col][row][dep];
+                    }
+                }
+            }
+            return sum;
+        }
+
+        function computeNextGeneration() {
+            let nextGrid = make3DArray(GRID_SIZE, 0);
+            let nextCellAgeGrid = make3DArray(GRID_SIZE, 0);
+
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let z = 0; z < GRID_SIZE; z++) {
+                        let state = grid[x][y][z];
+                        let age = cellAgeGrid[x][y][z];
+                        let neighbors = countNeighbors(x, y, z);
+
+                        if (state === 0 && birthRules.includes(neighbors)) {
+                            nextGrid[x][y][z] = 1;
+                            nextCellAgeGrid[x][y][z] = 1;
+                        } else if (state === 1 && survivalRules.includes(neighbors)) {
+                            if (enableDeathByAge && age >= MAX_AGE) {
+                                nextGrid[x][y][z] = 0;
+                                nextCellAgeGrid[x][y][z] = 0;
+                            } else {
+                                nextGrid[x][y][z] = 1;
+                                nextCellAgeGrid[x][y][z] = Math.min(age + 1, MAX_AGE);
+                            }
+                        } else {
+                            nextGrid[x][y][z] = 0;
+                            nextCellAgeGrid[x][y][z] = 0;
+                        }
+                    }
+                }
+            }
+            grid = nextGrid;
+            cellAgeGrid = nextCellAgeGrid;
+            generation++;
+            updateVisualization();
+            updateGenerationDisplay();
+        }
+
+        function updateVisualization() {
+            const baseHue = 0.6; // Blue/Cyan for young
+            const hueRange = -0.6; // Towards Red/Magenta for old
+
+            for (let x = 0; x < GRID_SIZE; x++) {
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let z = 0; z < GRID_SIZE; z++) {
+                        const cellCube = cubes[x][y][z];
+                        if (grid[x][y][z] === 1) {
+                            cellCube.visible = true;
+                            const age = cellAgeGrid[x][y][z];
+                            const ageRatio = Math.min(age / MAX_AGE, 1.0);
+                            
+                            const hue = (baseHue + ageRatio * hueRange + 1.0) % 1.0;
+                            const saturation = 0.8 + ageRatio * 0.2;
+                            const lightness = 0.6 - ageRatio * 0.2;
+
+                            cellCube.material.color.setHSL(hue, saturation, lightness);
+                            cellCube.material.opacity = 0.7 + (1-ageRatio) * 0.3;
+                        } else {
+                            cellCube.visible = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- UI Update Functions ---
+        function updateGenerationDisplay() { generationDisplay.textContent = `Generation: ${generation}`; }
+        function updateSpeedDisplay() { speedValueSpan.textContent = simulationDelay; }
+        function updateRulesDisplayDOM() { rulesDisplay.textContent = `Current Rules: B${birthRules.join('')}/S${survivalRules.join('')}`; }
+        
+        function updateButtonStates() {
+            startPauseButton.textContent = isRunning ? 'Pause' : 'Start';
+            stepButton.disabled = isRunning;
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- Event Handlers ---
+        function stopSimulation() {
+            if (isRunning) {
+                isRunning = false;
+                if (simulationIntervalId !== null) clearInterval(simulationIntervalId);
+                simulationIntervalId = null;
+                updateButtonStates();
+            }
+        }
+
+        function toggleRunning() {
+            isRunning = !isRunning;
+            updateButtonStates();
+            if (isRunning) {
+                if (simulationIntervalId === null) {
+                    simulationIntervalId = setInterval(computeNextGeneration, simulationDelay);
+                }
+            } else {
+                if (simulationIntervalId !== null) {
+                    clearInterval(simulationIntervalId);
+                    simulationIntervalId = null;
+                }
+            }
+        }
+
+        function stepSimulation() {
+            if (!isRunning) computeNextGeneration();
+        }
+
+        function handleRandomize() {
+            stopSimulation();
+            randomizeGridData();
+        }
+
+        function handleClear() {
+            stopSimulation();
+            clearGridData();
+        }
+
+        function handleSpeedChange() {
+            simulationDelay = parseInt(speedSlider.value, 10);
+            updateSpeedDisplay();
+            if (isRunning) {
+                clearInterval(simulationIntervalId);
+                simulationIntervalId = setInterval(computeNextGeneration, simulationDelay);
+            }
+        }
+        
+        function handleGridSizeChange() {
+            const newSize = parseInt(gridSizeInput.value);
+            if (newSize >= 5 && newSize <= 25 && newSize !== GRID_SIZE) {
+                stopSimulation();
+                GRID_SIZE = newSize;
+                setupGridAndVisuals(); // This re-initializes grid, cubes, camera
+                console.log(`Grid size changed to ${GRID_SIZE}`);
+            } else {
+                gridSizeInput.value = GRID_SIZE; // Revert if invalid
+            }
+        }
+        
+        function resetCameraView() {
+            camera.position.copy(initialCameraPosition);
+            camera.lookAt(initialControlsTarget);
+            if (controls) {
+                controls.target.copy(initialControlsTarget);
+                controls.update();
+            }
+        }
+
+        function parseRuleString(ruleStr) { // For 3D, max neighbors is 26
+            return ruleStr.split(/[,;\s]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n >= 0 && n <= 26);
+        }
+
+        function handleRuleChange() {
+            const newBirthRules = parseRuleString(birthRuleInput.value);
+            const newSurvivalRules = parseRuleString(survivalRuleInput.value);
+
+            if (newBirthRules.length > 0) birthRules = newBirthRules;
+            birthRuleInput.value = birthRules.join(',');
+
+            if (newSurvivalRules.length > 0) survivalRules = newSurvivalRules;
+            survivalRuleInput.value = survivalRules.join(',');
+            
+            updateRulesDisplayDOM();
+            console.log("Rules updated: B", birthRules, "/ S", survivalRules);
+        }
+        
+        function onWindowResize() {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            if (width > 0 && height > 0) {
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+        }
+
+        // --- Preset Loaders ---
+        function seedPreset(type, size) {
+            stopSimulation();
+            clearGridData(); // Start with empty grid
+
+            const center = Math.floor(GRID_SIZE / 2);
+            
+            switch(type) {
+                case 'cube':
+                    const c_start = center - Math.floor(size / 2);
+                    const c_end = c_start + size;
+                    for (let x = c_start; x < c_end; x++) {
+                        for (let y = c_start; y < c_end; y++) {
+                            for (let z = c_start; z < c_end; z++) {
+                                if (x>=0 && x<GRID_SIZE && y>=0 && y<GRID_SIZE && z>=0 && z<GRID_SIZE) {
+                                    grid[x][y][z] = 1; cellAgeGrid[x][y][z] = 1;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'sphere': // Approximate sphere
+                    const radiusSq = (size/2 * size/2);
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        for (let y = 0; y < GRID_SIZE; y++) {
+                            for (let z = 0; z < GRID_SIZE; z++) {
+                                const dx = x - center;
+                                const dy = y - center;
+                                const dz = z - center;
+                                if (dx*dx + dy*dy + dz*dz <= radiusSq) {
+                                    grid[x][y][z] = 1; cellAgeGrid[x][y][z] = 1;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'randomCluster':
+                    const r_start = center - Math.floor(size / 2);
+                    const r_end = r_start + size;
+                    for (let x = r_start; x < r_end; x++) {
+                        for (let y = r_start; y < r_end; y++) {
+                            for (let z = r_start; z < r_end; z++) {
+                                if (x>=0 && x<GRID_SIZE && y>=0 && y<GRID_SIZE && z>=0 && z<GRID_SIZE) {
+                                    if(Math.random() > 0.5) {
+                                        grid[x][y][z] = 1; cellAgeGrid[x][y][z] = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'rod': // 1x1xSize rod along Z axis
+                    const rod_start_z = center - Math.floor(size / 2);
+                    const rod_end_z = rod_start_z + size;
+                    for (let z = rod_start_z; z < rod_end_z; z++) {
+                        if (center>=0 && center<GRID_SIZE && z>=0 && z<GRID_SIZE) {
+                           grid[center][center][z] = 1; cellAgeGrid[center][center][z] = 1;
+                        }
+                    }
+                    break;
+                case 'plane': // Size x Size x 1 plane on XY
+                    const plane_start = center - Math.floor(size / 2);
+                    const plane_end = plane_start + size;
+                    for (let x = plane_start; x < plane_end; x++) {
+                        for (let y = plane_start; y < plane_end; y++) {
+                             if (x>=0 && x<GRID_SIZE && y>=0 && y<GRID_SIZE && center>=0 && center<GRID_SIZE) {
+                                grid[x][y][center] = 1; cellAgeGrid[x][y][center] = 1;
+                             }
+                        }
+                    }
+                    break;
+            }
+            updateVisualization();
+            updateGenerationDisplay();
+            console.log(`Seeded 3D pattern: ${type} of size ${size}`);
+        }
+
+        // --- Start ---
+        init();
+    </script>
+</body>
+</html>

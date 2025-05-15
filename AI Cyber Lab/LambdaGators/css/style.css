@@ -1,0 +1,487 @@
+/* --- Theme: Professional & Elementary School (Toy Story Inspired) --- */
+body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #FFF9E6; /* Warm, light cream (like a toy box or kid's room wall) */
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 15px 20px;
+    background-color: #4A90E2; /* Friendly blue (like Woody's shirt / sky) */
+    color: white;
+    border-radius: 12px; /* Softer, toy-like corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2em; /* Ensure it's a good size */
+}
+
+#game-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px; /* A bit more spacing */
+    justify-content: center;
+}
+
+/* Common styling for main content boxes */
+.content-box {
+    padding: 20px;
+    border: 1px solid #D1D1D1; /* Softer border color */
+    background-color: #FFFFFF; /* Clean white for content areas */
+    border-radius: 12px; /* Consistent rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#game-area {
+    flex-basis: 60%;
+    min-width: 350px; /* Adjusted min-width */
+}
+#game-area h2, #explanation-panel h2, #controls-section h2, 
+#tromp-diagram-section h2, #project-description-section h2 { /* Added #project-description-section h2 */
+    margin-top: 0;
+    color: #2c6aa0; /* Darker shade of the header blue for titles */
+    margin-bottom: 15px;
+}
+
+#function-display-area, #argument-staging-area {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 2px dashed #B0E0E6; /* Playful light blue dashed border */
+    min-height: 120px;
+    background-color: #F0F8FF; /* Very light, almost white blue */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; /* So multiple families stack if we allow it */
+}
+
+#controls-section {
+    margin-top: 25px;
+    text-align: center;
+}
+#controls-section button {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #FFC107; /* Bright, friendly yellow (like a toy accent) */
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+#controls-section button:hover {
+    background-color: #FFD54F; /* Lighter yellow on hover */
+}
+/* Style for the new about button to distinguish it if desired */
+#about-project-button {
+    background-color: #6c757d; /* A more neutral/info color */
+    color: white;
+}
+#about-project-button:hover {
+    background-color: #5a6268;
+}
+
+
+#reset-button, #next-example-button, #apply-manually-button, #about-project-button { /* Ensure about button is also initially displayed */
+    display: inline-block; 
+    margin: 5px 10px; 
+}
+
+#explanation-panel {
+    flex-basis: 35%;
+    min-width: 300px; 
+}
+
+#lambda-notation-display {
+    margin-top: 20px;
+    padding:15px;
+    border: 1px solid #E0E0E0;
+    background-color: #F9F9F9;
+    border-radius:8px;
+    font-family: monospace; 
+    font-size: 0.95em;
+    white-space: pre-wrap; 
+}
+
+.placeholder-text {
+    color: #777; 
+    font-style: italic;
+    text-align: center;
+}
+
+/* --- Project Description Section Styles --- */
+#project-description-section {
+    text-align: left; /* Override content-box center if needed for paragraph text */
+    line-height: 1.7; /* More spacing for readability */
+}
+#project-description-section h3 {
+    color: #3a86ff; /* Match header blue for subheadings */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+#project-description-section p, #project-description-section li {
+    margin-bottom: 10px;
+}
+#project-description-section ul {
+    padding-left: 20px;
+}
+#project-description-section strong {
+    color: #2c6aa0; /* Darker blue for emphasis */
+}
+
+/* Basic responsive consideration */
+@media (max-width: 768px) { /* Tablet and smaller phones */
+    body {
+        padding: 10px; 
+    }
+
+    header h1 {
+        font-size: 1.8em; 
+    }
+
+    #game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px; 
+    }
+
+    #game-area, 
+    #explanation-panel, 
+    #controls-section, 
+    #tromp-diagram-section,
+    #project-description-section { /* Ensure description section also stacks */
+        flex-basis: 95%; 
+        width: 95%;
+        margin-bottom: 20px;
+        min-width: 0; 
+    }
+
+    #function-display-area, 
+    #argument-staging-area {
+        min-height: 100px; 
+    }
+
+    #controls-section button {
+        padding: 8px 15px; 
+        font-size: 0.9em;
+    }
+
+    #tromp-diagram-svg-container {
+        width: 100%; 
+        height: 300px; 
+    }
+
+    .family-container {
+        margin: 5px; 
+        padding: 5px;
+    }
+    
+    .egg {
+        width: 40px;
+        height: 55px;
+        font-size: 0.9em;
+    }
+
+    .alligator {
+        padding: 6px 10px;
+        min-width: 40px;
+        font-size: 0.9em;
+    }
+    .alligator::before {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) { /* Smaller mobile screens */
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    #game-area h2, 
+    #explanation-panel h2, 
+    #controls-section h2,
+    #tromp-diagram-section h2,
+    #project-description-section h2 { /* Added */
+        font-size: 1.2em; 
+    }
+
+    #explanation-panel, 
+    #lambda-notation-display,
+    #project-description-section { /* Added */
+        font-size: 0.9em; 
+    }
+    
+    #tromp-diagram-svg-container {
+        height: 250px; 
+    }
+}
+
+/* --- Alligator Eggs Game Specific Styles --- */
+/* ... (keep existing styles for .family-container, .alligator, .egg, .color-*, .drag-over-active) ... */
+/* (These are unchanged from the previous full CSS, so I'm omitting them for brevity here, but they should be present) */
+
+.family-container {
+    display: inline-block; 
+    border: 2px solid #777; 
+    padding: 8px;
+    margin: 10px;
+    background-color: #fdfdfd;
+    border-radius: 8px;
+    text-align: center; 
+    vertical-align: top; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: grab; 
+}
+
+.family-id { 
+    font-size: 0.7em;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.expression-wrapper { 
+}
+
+.alligator {
+    padding: 8px 12px;
+    margin: 4px; 
+    border-radius: 15px 15px 5px 5px; 
+    color: white; 
+    font-weight: bold;
+    position: relative; 
+    min-width: 50px;
+    text-align: center;
+    display: inline-block; 
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.alligator::before { 
+    content: "λ"; 
+    position: absolute;
+    left: -2px; 
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1em;
+    padding: 0 5px;
+    color: rgba(255, 255, 255, 0.7); 
+}
+
+.alligator .variable-name { 
+    padding-left: 5px; 
+}
+
+.alligator.old {
+    border-radius: 8px; 
+    background-color: #A0A0A0 !important; 
+    border: 1px solid #666;
+    font-style: italic;
+}
+
+.alligator.old::before {
+    content: ""; 
+}
+
+.alligator > .expression-wrapper > .alligator, 
+.alligator > .expression-wrapper > .egg {     
+    margin-top: 8px; 
+}
+
+.egg {
+    width: 45px;
+    height: 60px;
+    border-radius: 50% / 60% 60% 40% 40%; 
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+    color: #333; 
+    font-weight: bold;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-sizing: border-box; 
+}
+
+/* Color Classes */
+.color-blue { background-color: #5DADE2; } 
+.color-blue.egg { color: #1A5276; } 
+.color-green { background-color: #58D68D; } 
+.color-green.egg { color: #186A3B; } 
+.color-red { background-color: #EC7063; } 
+.color-red.egg { color: #78281F; } 
+.color-yellow { background-color: #F7DC6F; }
+.color-yellow.egg { color: #7D6608; } 
+.color-purple { background-color: #AF7AC5; }
+.color-purple.egg { color: #5B2C6F; } 
+.color-orange { background-color: #F5B041; }
+.color-orange.egg { color: #7E5109; } 
+.color-pink { background-color: #F5B7B1; } 
+.color-pink.egg { color: #78281F; } 
+.color-teal { background-color: #48C9B0; }
+.color-teal.egg { color: #148F77; } 
+.color-cyan { background-color: #4DD0E1; }
+.color-cyan.egg { color: #006064; } 
+.color-magenta { background-color: #D279D2; } 
+.color-magenta.egg { color: #6A1B9A; } 
+
+.alligator.color-blue, .alligator.color-green, .alligator.color-red,
+.alligator.color-yellow, .alligator.color-purple, .alligator.color-orange,
+.alligator.color-pink, .alligator.color-teal, .alligator.color-cyan, .alligator.color-magenta {
+    color: white; 
+}
+.alligator.color-yellow {
+    color: #424242; 
+}
+
+/* Drag and Drop Visual Cue */
+.drag-over-active {
+    background-color: #D0EFFF !important; 
+    border-style: solid !important;
+    border-color: #3a86ff !important;
+}
+
+
+/* --- Tromp Diagram Styles --- */
+#tromp-diagram-section {
+    margin-top: 25px;
+    text-align: center; 
+}
+
+#tromp-diagram-svg-container {
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+.tromp-link {
+    stroke: #777;
+    stroke-opacity: 0.8;
+    stroke-width: 1.5px;
+}
+.tromp-link.variable_binding {
+    stroke-dasharray: 3,3; 
+    stroke: #2a9d8f; 
+}
+.tromp-link.scope_link {
+    stroke-dasharray: 2,2; 
+    stroke: #aaa;
+    stroke-width: 1px;
+}
+
+.tromp-node circle {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+.tromp-node text {
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    pointer-events: none; 
+    fill: #333;
+}
+
+.tromp-node.lambda circle { fill: #e76f51; } 
+.tromp-node.variable circle { fill: #f4a261; } 
+.tromp-node.variable.isBinder circle { fill: #e9c46a; } 
+.tromp-node.constant circle { fill: #2a9d8f; } 
+
+.tromp-node.variable.color-blue circle { fill: #5DADE2; }
+.tromp-node.variable.color-green circle { fill: #58D68D; }
+.tromp-node.variable.color-red circle { fill: #EC7063; }
+
+
+/* --- Animation Styles --- */
+.animating-argument-move {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 1;
+    z-index: 100; 
+    position: relative; 
+}
+
+.animating-argument-consumed {
+    transform: scale(0.1) !important; 
+    opacity: 0 !important;
+    transition: transform 0.3s ease-in, opacity 0.2s ease-out;
+}
+
+.animating-function-disappear {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.animating-function-appear {
+    opacity: 0;
+    transform: scale(0.9);
+    animation: fadeInAndScale 0.4s 0.2s ease-out forwards; 
+}
+
+@keyframes fadeInAndScale {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.visually-hidden-during-animation {
+    opacity: 0 !important;
+    pointer-events: none !important; 
+}
+
+/* --- Tooltip Styles (Consolidated & Refined) --- */
+.has-tooltip {
+    position: relative; 
+    cursor: help; 
+}
+
+.has-tooltip:hover {
+    z-index: 10; 
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: max-content;         
+    max-width: 200px;           
+    background-color: #333;     
+    color: #fff;
+    text-align: left;           
+    border-radius: 6px;
+    padding: 8px 12px;          
+    position: absolute;
+    z-index: 101;               
+    bottom: 135%;               
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out, visibility 0s linear 0.25s; 
+    font-size: 0.9em;          
+    font-weight: normal; 
+    white-space: pre-wrap; 
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.2); 
+    pointer-events: none;       
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%; 
+    left: 50%;
+    transform: translateX(-50%); 
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent; 
+}
+
+.has-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0.05s; 
+    transition: opacity 0.25s ease-in-out 0.05s, visibility 0s linear 0.05s; 
+}

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stylized Fractal Explorer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            overscroll-behavior: none; /* Prevents pull-to-refresh on touch devices */
+        }
+        #controls {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+        #controls label {
+            margin-right: 5px;
+        }
+        .canvas-container {
+            position: relative;
+            width: 800px; /* Fallback for JS disabled */
+            height: 600px; /* Fallback for JS disabled */
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        #fractalCanvas {
+            display: block; /* Removes extra space below canvas */
+            border: 1px solid #444;
+            cursor: crosshair;
+            background-color: #000; /* Background for canvas before rendering */
+        }
+        .info-container {
+            margin-top: 12px;
+            font-size: 0.9em;
+            color: #b0b0b0;
+            min-height: 40px; /* Space for two lines */
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+        #infoDisplay, #mouseCoordsDisplay {
+             min-height: 18px;
+        }
+        #resetViewButton, #fractalSelector {
+            padding: 8px 12px;
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease;
+        }
+        #resetViewButton:hover, #fractalSelector:hover {
+            background-color: #444;
+        }
+        #fractalSelector {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 30px; /* Space for arrow */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.8em;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .selection-rect {
+            position: absolute;
+            border: 1px dashed rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="fractalSelector">Fractal:</label>
+        <select id="fractalSelector">
+            <option value="mandelbrot_default">Default View (Mandelbrot)</option>
+            <option value="julia_basilica">1. The Basilica (c=-1)</option>
+            <option value="julia_douady_rabbit">2. Douady Rabbit (c ≈ -0.123+0.745i)</option>
+            <option value="julia_san_marco">3. San Marco (c ≈ -0.75+0.11i)</option>
+            <option value="julia_filled_cardioid">4. Filled Julia (c=-0.2+0i)</option>
+            <option value="julia_filled_circle">4b. Filled Julia (c=0+0i)</option>
+            <option value="julia_dust_1">5. Disconnected Julia (c=0.4+0.4i)</option>
+            <option value="julia_dust_2">5b. Disconnected Julia (c=-1.5+0.1i)</option>
+            <option value="julia_custom" id="juliaCustomOption" style="display: none;">Custom Julia Set</option>
+        </select>
+        <button id="resetViewButton">Reset View</button>
+    </div>
+
+    <div id="canvasContainer" class="canvas-container">
+        <canvas id="fractalCanvas"></canvas>
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">Rendering...</div>
+        <div id="selectionRect" class="selection-rect" style="display: none;"></div>
+    </div>
+    
+    <div class="info-container">
+        <div id="infoDisplay">Initializing...</div>
+        <div id="mouseCoordsDisplay">Mouse: (Re: -, Im: -)</div>
+    </div>
+
+    <script>
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 600;
+        
+        // Iteration settings
+        const BASE_MAX_ITERATIONS = 250; // Base iterations for a standard view
+        const MIN_MAX_ITERATIONS = 100;   // Minimum iterations
+        const MAX_MAX_ITERATIONS = 2000;  // Maximum iterations for deep zooms
+        const ITERATION_DEPTH_FACTOR = 60; // How much iterations increase with zoom depth
+        const ANIMATION_ITER_CAP = 150;   // Max iterations during animations for responsiveness
+
+        const ESCAPE_RADIUS_SQUARED = 16.0; // Escape radius R=4, R^2=16 (can be tweaked, R=2, R^2=4 is common)
+
+        // DOM Elements
+        let canvas, ctx, fractalSelector, resetViewButton, infoDisplay, mouseCoordsDisplay, loadingOverlay, selectionRectDiv, juliaCustomOption;
+        
+        // Fractal State
+        let currentFractalType = 'mandelbrot';
+        let juliaC = { r: 0, i: 0 };
+        let currentMaxIterations = BASE_MAX_ITERATIONS;
+
+        // View Parameters (complex plane)
+        let view = {
+            centerX: -0.7,
+            centerY: 0.0,
+            heightComplex: 2.5, // This is the primary parameter for zoom
+            widthComplex: 0, minR: 0, maxR: 0, minI: 0, maxI: 0 // Calculated by updateViewBounds
+        };
+        
+        const INITIAL_MANDELBROT_PARAMS = { centerX: -0.7, centerY: 0.0, heightComplex: 2.5 };
+        const INITIAL_JULIA_PARAMS = { centerX: 0.0, centerY: 0.0, heightComplex: 3.5 };
+
+        const PRESET_FRACTALS = {
+            'mandelbrot_default': { type: 'mandelbrot', params: INITIAL_MANDELBROT_PARAMS },
+            'julia_basilica': { type: 'julia', c: { r: -1.0, i: 0.0 }, params: { centerX: 0.0, centerY: 0.0, heightComplex: 3.0 } },
+            'julia_douady_rabbit': { type: 'julia', c: { r: -0.12256, i: 0.74486 }, params: { centerX: 0.0, centerY: 0.0, heightComplex: 2.5 } },
+            'julia_san_marco': { type: 'julia', c: { r: -0.75, i: 0.11 }, params: { centerX: -0.1, centerY: 0.0, heightComplex: 2.8 } },
+            'julia_filled_cardioid': { type: 'julia', c: { r: -0.2, i: 0.0 }, params: INITIAL_JULIA_PARAMS },
+            'julia_filled_circle': { type: 'julia', c: { r: 0.0, i: 0.0 }, params: INITIAL_JULIA_PARAMS },
+            'julia_dust_1': { type: 'julia', c: { r: 0.4, i: 0.4 }, params: INITIAL_JULIA_PARAMS },
+            'julia_dust_2': { type: 'julia', c: { r: -1.5, i: 0.1 }, params: INITIAL_JULIA_PARAMS },
+            'julia_custom': { type: 'julia', params: INITIAL_JULIA_PARAMS } // Placeholder for custom C
+        };
+
+        // Zooming/Panning State
+        let isDragging = false;
+        let dragStartX, dragStartY, dragCurrentX, dragCurrentY;
+
+        // Animation State
+        let animationFrameId = null;
+        let currentAnimationSourceView = null; // Store the view state at the start of an animation
+        let targetView = null;
+        let animationStartTime;
+        const ANIMATION_DURATION = 300; // ms, faster for smoother interaction
+
+        document.addEventListener('DOMContentLoaded', () => {
+            canvas = document.getElementById('fractalCanvas');
+            ctx = canvas.getContext('2d', { alpha: false });
+            fractalSelector = document.getElementById('fractalSelector');
+            resetViewButton = document.getElementById('resetViewButton');
+            infoDisplay = document.getElementById('infoDisplay');
+            mouseCoordsDisplay = document.getElementById('mouseCoordsDisplay');
+            loadingOverlay = document.getElementById('loadingOverlay');
+            selectionRectDiv = document.getElementById('selectionRect');
+            juliaCustomOption = document.getElementById('juliaCustomOption');
+            
+            const canvasContainer = document.getElementById('canvasContainer');
+            canvasContainer.style.width = `${CANVAS_WIDTH}px`;
+            canvasContainer.style.height = `${CANVAS_HEIGHT}px`;
+            canvas.width = CANVAS_WIDTH;
+            canvas.height = CANVAS_HEIGHT;
+
+            setupEventListeners();
+            loadFractalPreset('mandelbrot_default', true); // Initial load, no animation
+        });
+
+        function setupEventListeners() {
+            fractalSelector.addEventListener('change', handleFractalSelectionChange);
+            resetViewButton.addEventListener('click', handleResetView);
+
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMoveGeneral); // Renamed for clarity
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseleave', handleMouseLeave);
+            canvas.addEventListener('wheel', handleMouseWheel, { passive: false }); // passive:false to allow preventDefault
+        }
+        
+        function showLoading() { loadingOverlay.style.display = 'flex'; }
+        function hideLoading() { loadingOverlay.style.display = 'none'; }
+
+        function updateViewBounds(v) {
+            const aspectRatio = canvas.width / canvas.height;
+            v.widthComplex = v.heightComplex * aspectRatio;
+            v.minR = v.centerX - v.widthComplex / 2;
+            v.maxR = v.centerX + v.widthComplex / 2;
+            v.minI = v.centerY - v.heightComplex / 2; // In complex plane, smaller imaginary is "lower"
+            v.maxI = v.centerY + v.heightComplex / 2; // Larger imaginary is "higher"
+        }
+
+        function mapRange(value, inMin, inMax, outMin, outMax) {
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+        }
+        
+        function calculateDynamicMaxIterations() {
+            const zoomLevelFactor = INITIAL_MANDELBROT_PARAMS.heightComplex / view.heightComplex;
+            let iterations = BASE_MAX_ITERATIONS + Math.log2(Math.max(1, zoomLevelFactor)) * ITERATION_DEPTH_FACTOR;
+            currentMaxIterations = Math.round(Math.max(MIN_MAX_ITERATIONS, Math.min(iterations, MAX_MAX_ITERATIONS)));
+        }
+
+        function getColor(n, maxIterUsed, zR, zI) {
+            if (n === maxIterUsed) return [0, 0, 0]; // Inside set
+
+            const log_zn = Math.log(zR * zR + zI * zI) / 2;
+            const nu = Math.log(log_zn / Math.log(Math.sqrt(ESCAPE_RADIUS_SQUARED))) / Math.log(2); // log_2(log_escape_radius |Z|)
+            let smoothN = n + 1 - nu;
+            smoothN = Math.max(0, Math.min(smoothN, maxIterUsed));
+
+            // Polynomial palette (normalized smoothN)
+            let t = smoothN / maxIterUsed;
+            // t = Math.pow(t, 0.5); // Adjust power to change gradient distribution
+
+            let r = Math.floor(Math.min(255, 9 * (1 - t) * t * t * t * 255));
+            let g = Math.floor(Math.min(255, 15 * (1 - t) * (1 - t) * t * t * 255));
+            let b = Math.floor(Math.min(255, 8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255));
+            
+            return [r, g, b];
+        }
+
+        function calculateMandelbrotPoint(cr, ci, maxIter) {
+            let zr = 0, zi = 0, zr_sq = 0, zi_sq = 0;
+            let n;
+            for (n = 0; n < maxIter; n++) {
+                zi = 2 * zr * zi + ci; // z_new_imag
+                zr = zr_sq - zi_sq + cr; // z_new_real
+                zr_sq = zr * zr;
+                zi_sq = zi * zi;
+                if (zr_sq + zi_sq > ESCAPE_RADIUS_SQUARED) break;
+            }
+            return { n, zR_final: zr, zI_final: zi };
+        }
+
+        function calculateJuliaPoint(zr_init, zi_init, c_real, c_imag, maxIter) {
+            let zr = zr_init, zi = zi_init;
+            let zr_sq = zr*zr, zi_sq = zi*zi;
+            let n;
+            for (n = 0; n < maxIter; n++) {
+                let zr_temp = zr_sq - zi_sq + c_real;
+                zi = 2 * zr * zi + c_imag;
+                zr = zr_temp;
+                zr_sq = zr * zr;
+                zi_sq = zi * zi;
+                if (zr_sq + zi_sq > ESCAPE_RADIUS_SQUARED) break;
+            }
+            return { n, zR_final: zr, zI_final: zi };
+        }
+
+        function performRenderPass(viewParams, iterationsToUse) {
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // Note: In complex plane, smaller imag numbers are often "down", larger are "up".
+            // Canvas y=0 is top, y=height is bottom.
+            // So, map y_px=0 to viewParams.maxI, and y_px=height to viewParams.minI.
+            for (let y_px = 0; y_px < canvas.height; y_px++) {
+                for (let x_px = 0; x_px < canvas.width; x_px++) {
+                    const real = mapRange(x_px, 0, canvas.width, viewParams.minR, viewParams.maxR);
+                    const imag = mapRange(y_px, 0, canvas.height, viewParams.maxI, viewParams.minI); 
+
+                    let result;
+                    if (currentFractalType === 'mandelbrot') {
+                        result = calculateMandelbrotPoint(real, imag, iterationsToUse);
+                    } else { // Julia Set
+                        result = calculateJuliaPoint(real, imag, juliaC.r, juliaC.i, iterationsToUse);
+                    }
+
+                    const color = getColor(result.n, iterationsToUse, result.zR_final, result.zI_final);
+                    const offset = (y_px * canvas.width + x_px) * 4;
+                    data[offset] = color[0];
+                    data[offset + 1] = color[1];
+                    data[offset + 2] = color[2];
+                    data[offset + 3] = 255; // Alpha
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        function renderFullQualityFractal() {
+            if (animationFrameId) return; // Do not render if an animation is actively changing the view
+            
+            showLoading();
+            calculateDynamicMaxIterations(); // Update currentMaxIterations based on final view
+            
+            setTimeout(() => {
+                updateViewBounds(view); // Ensure global view's bounds are up-to-date
+                performRenderPass(view, currentMaxIterations);
+                updateInfoDisplay();
+                hideLoading();
+            }, 10);
+        }
+
+        function updateInfoDisplay() {
+            const initialHeight = (currentFractalType === 'mandelbrot' || currentFractalType === 'julia_custom') 
+                                ? INITIAL_MANDELBROT_PARAMS.heightComplex 
+                                : (PRESET_FRACTALS[fractalSelector.value]?.params.heightComplex || INITIAL_JULIA_PARAMS.heightComplex);
+            const zoomLevel = initialHeight / view.heightComplex;
+            
+            let fractalName = currentFractalType === 'mandelbrot' ? 'Mandelbrot Set' : 'Julia Set';
+            if (currentFractalType === 'julia') {
+                 fractalName += ` (c = ${juliaC.r.toFixed(4)} + ${juliaC.i.toFixed(4)}i)`;
+            }
+
+            infoDisplay.textContent = 
+                `${fractalName} | Center: (Re: ${view.centerX.toFixed(4)}, Im: ${view.centerY.toFixed(4)}) | ` +
+                `View H: ${view.heightComplex.toExponential(3)} | Zoom: ${zoomLevel.toFixed(1)}x | Max Iter: ${currentMaxIterations}`;
+        }
+        
+        function startAnimationToTarget(newTargetView, immediate = false) {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            targetView = { ...newTargetView }; // Copy the target
+            updateViewBounds(targetView); // Ensure targetView has all bounds calculated
+
+            if (immediate) {
+                view = { ...targetView }; // Directly set view
+                updateViewBounds(view);
+                renderFullQualityFractal();
+            } else {
+                currentAnimationSourceView = { ...view }; // Copy current view state for lerping
+                updateViewBounds(currentAnimationSourceView); // Ensure source view bounds are calculated
+
+                animationStartTime = performance.now();
+                animationFrameId = requestAnimationFrame(animateViewChange);
+            }
+        }
+
+        function animateViewChange(timestamp) {
+            const elapsedTime = timestamp - animationStartTime;
+            let progress = elapsedTime / ANIMATION_DURATION;
+            progress = Math.min(progress, 1);
+            
+            const easedProgress = easeInOutCubic(progress);
+
+            // Lerp from currentAnimationSourceView to targetView
+            view.centerX = lerp(currentAnimationSourceView.centerX, targetView.centerX, easedProgress);
+            view.centerY = lerp(currentAnimationSourceView.centerY, targetView.centerY, easedProgress);
+            view.heightComplex = lerp(currentAnimationSourceView.heightComplex, targetView.heightComplex, easedProgress);
+            
+            updateViewBounds(view); // Update global view's min/max R/I based on new center/height
+            
+            calculateDynamicMaxIterations(); // Recalculate for current (intermediate) view
+            performRenderPass(view, Math.min(currentMaxIterations, ANIMATION_ITER_CAP));
+            updateInfoDisplay();
+
+            if (progress < 1) {
+                animationFrameId = requestAnimationFrame(animateViewChange);
+            } else {
+                // Animation finished: ensure view is precisely at targetView
+                view.centerX = targetView.centerX;
+                view.centerY = targetView.centerY;
+                view.heightComplex = targetView.heightComplex;
+                updateViewBounds(view); // Final update of bounds
+
+                animationFrameId = null;
+                targetView = null;
+                currentAnimationSourceView = null;
+                
+                renderFullQualityFractal(); // Render final frame with full dynamic iterations
+            }
+        }
+
+        function handleFractalSelectionChange() {
+            const selectedValue = fractalSelector.value;
+            if (selectedValue === 'julia_custom') { // If user re-selects custom after navigating away
+                // Keep current custom Julia params, just re-render if needed (e.g., if view was changed by another preset)
+                // This assumes juliaC is still set from a previous click.
+                // If juliaC is not what they expect, they can click Mandelbrot again.
+                startAnimationToTarget(PRESET_FRACTALS.julia_custom.params); // Go to a default view for the custom Julia
+                return;
+            }
+            juliaCustomOption.style.display = 'none'; // Hide if not 'julia_custom'
+            loadFractalPreset(selectedValue);
+        }
+        
+        function loadFractalPreset(presetKey, immediate = false) {
+            const preset = PRESET_FRACTALS[presetKey];
+            if (!preset) return;
+
+            currentFractalType = preset.type;
+            if (preset.type === 'julia' && preset.c) { // preset.c might not exist for "julia_custom" initially
+                juliaC = { ...preset.c };
+            }
+            
+            if (presetKey === 'julia_custom') {
+                // For custom Julia, use its specific params, potentially centered.
+                // The juliaC is already set by the click handler.
+                // This will be called if 'julia_custom' is selected from dropdown.
+                juliaCustomOption.style.display = 'block';
+            } else {
+                 juliaCustomOption.style.display = 'none';
+            }
+
+            startAnimationToTarget({ ...preset.params }, immediate);
+        }
+
+        function handleResetView() {
+            fractalSelector.value = 'mandelbrot_default';
+            juliaCustomOption.style.display = 'none';
+            loadFractalPreset('mandelbrot_default');
+        }
+
+        function handleMouseDown(event) {
+            if (event.button !== 0) return;
+
+            isDragging = true;
+            const rect = canvas.getBoundingClientRect();
+            dragStartX = event.clientX - rect.left;
+            dragStartY = event.clientY - rect.top;
+            dragCurrentX = dragStartX;
+            dragCurrentY = dragStartY;
+
+            selectionRectDiv.style.left = `${dragStartX}px`;
+            selectionRectDiv.style.top = `${dragStartY}px`;
+            selectionRectDiv.style.width = '0px';
+            selectionRectDiv.style.height = '0px';
+            selectionRectDiv.style.display = 'block';
+        }
+        
+        // Unified mouse move handler
+        function handleMouseMoveGeneral(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Update complex coordinate display
+            if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                updateViewBounds(view); // Ensure view bounds are fresh for mapping
+                const cR = mapRange(x, 0, canvas.width, view.minR, view.maxR);
+                const cI = mapRange(y, 0, canvas.height, view.maxI, view.minI);
+                mouseCoordsDisplay.textContent = `Mouse: (Re: ${cR.toFixed(6)}, Im: ${cI.toFixed(6)})`;
+            } else {
+                mouseCoordsDisplay.textContent = `Mouse: (Re: -, Im: -)`;
+            }
+
+            // Handle dragging for zoom selection
+            if (!isDragging) return;
+            dragCurrentX = x;
+            dragCurrentY = y;
+
+            const selX = Math.min(dragStartX, dragCurrentX);
+            const selY = Math.min(dragStartY, dragCurrentY);
+            const selWidth = Math.abs(dragCurrentX - dragStartX);
+            const selHeight = Math.abs(dragCurrentY - dragStartY);
+
+            selectionRectDiv.style.left = `${selX}px`;
+            selectionRectDiv.style.top = `${selY}px`;
+            selectionRectDiv.style.width = `${selWidth}px`;
+            selectionRectDiv.style.height = `${selHeight}px`;
+        }
+
+
+        function handleMouseUp(event) {
+            if (!isDragging) return;
+            isDragging = false;
+            selectionRectDiv.style.display = 'none';
+
+            const rect = canvas.getBoundingClientRect();
+            const dragEndX = event.clientX - rect.left;
+            const dragEndY = event.clientY - rect.top;
+
+            const selWidthPx = Math.abs(dragEndX - dragStartX);
+            const selHeightPx = Math.abs(dragEndY - dragStartY);
+
+            // Check for click (small drag) vs. drag-zoom
+            if (selWidthPx < 5 && selHeightPx < 5) { // Interpreted as a click
+                if (currentFractalType === 'mandelbrot') {
+                    updateViewBounds(view); // Ensure current view bounds are accurate before mapping
+                    const click_R = mapRange(dragStartX, 0, canvas.width, view.minR, view.maxR);
+                    const click_I = mapRange(dragStartY, 0, canvas.height, view.maxI, view.minI);
+
+                    currentFractalType = 'julia';
+                    juliaC = { r: click_R, i: click_I };
+                    
+                    juliaCustomOption.textContent = `Custom Julia (c ≈ ${click_R.toFixed(3)}+${click_I.toFixed(3)}i)`;
+                    juliaCustomOption.style.display = 'block';
+                    fractalSelector.value = 'julia_custom';
+                    
+                    // Animate to a default Julia view with the new 'c'
+                    startAnimationToTarget({ ...INITIAL_JULIA_PARAMS });
+                }
+                return; 
+            }
+
+            // Proceed with zoom from selection rectangle
+            updateViewBounds(view); 
+
+            const selMinPxX = Math.min(dragStartX, dragEndX);
+            const selMaxPxX = Math.max(dragStartX, dragEndX);
+            const selMinPxY = Math.min(dragStartY, dragEndY);
+            const selMaxPxY = Math.max(dragStartY, dragEndY);
+
+            const newCenterX_complex = mapRange((selMinPxX + selMaxPxX) / 2, 0, canvas.width, view.minR, view.maxR);
+            const newCenterY_complex = mapRange((selMinPxY + selMaxPxY) / 2, 0, canvas.height, view.maxI, view.minI);
+            
+            let newHeightComplex;
+            const selAspect = selWidthPx / selHeightPx;
+            const canvasAspect = canvas.width / canvas.height;
+            
+            if (selAspect > canvasAspect) { // Selection is wider than canvas aspect ratio
+                const newWidthComplex = mapRange(selWidthPx, 0, canvas.width, 0, view.widthComplex);
+                newHeightComplex = newWidthComplex / canvasAspect;
+            } else { 
+                newHeightComplex = mapRange(selHeightPx, 0, canvas.height, 0, view.heightComplex);
+            }
+
+            startAnimationToTarget({
+                centerX: newCenterX_complex,
+                centerY: newCenterY_complex,
+                heightComplex: newHeightComplex
+            });
+        }
+        
+        function handleMouseLeave() {
+            if (isDragging) {
+                isDragging = false;
+                selectionRectDiv.style.display = 'none';
+            }
+            mouseCoordsDisplay.textContent = `Mouse: (Re: -, Im: -)`;
+        }
+
+        function handleMouseWheel(event) {
+            event.preventDefault(); // Prevent page scrolling
+
+            const rect = canvas.getBoundingClientRect();
+            const mx = event.clientX - rect.left;
+            const my = event.clientY - rect.top;
+
+            // Ensure mouse is within canvas bounds for reliable zooming
+            if (mx < 0 || mx > canvas.width || my < 0 || my > canvas.height) return;
+
+            updateViewBounds(view); // Ensure current view bounds are accurate
+
+            const mouse_real = mapRange(mx, 0, canvas.width, view.minR, view.maxR);
+            const mouse_imag = mapRange(my, 0, canvas.height, view.maxI, view.minI);
+
+            const zoomFactor = event.deltaY < 0 ? 0.8 : 1.25; // 0.8 for zoom in, 1.25 for zoom out
+            const newHeightComplex = view.heightComplex * zoomFactor;
+            const newWidthComplex = newHeightComplex * (canvas.width / canvas.height);
+
+            // Calculate new center so the point under the mouse remains stationary
+            const targetCenterX = mouse_real + (0.5 - mx / canvas.width) * newWidthComplex;
+            const targetCenterY = mouse_imag + (my / canvas.height - 0.5) * newHeightComplex;
+            
+            startAnimationToTarget({
+                centerX: targetCenterX,
+                centerY: targetCenterY,
+                heightComplex: newHeightComplex
+            });
+        }
+
+        function lerp(start, end, t) { return start * (1 - t) + end * t; }
+        function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+    </script>
+</body>
+</html>

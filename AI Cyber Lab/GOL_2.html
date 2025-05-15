@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life - Enhanced</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align to top */
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-bottom: 30px;
+            background-color: #f0f0f0;
+            font-family: sans-serif;
+        }
+        main#canvas-container {
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            margin-top: 10px;
+            min-width: 50px;
+            min-height: 50px;
+            line-height: 0; /* Prevent extra space below canvas */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 { margin-bottom: 5px; margin-top: 15px; }
+
+        .controls-section {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+        .controls-section strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .control-group {
+            margin-bottom: 8px;
+            display: inline-block; /* Keep elements in line where possible */
+            margin-right: 10px;
+        }
+        .control-group label {
+            margin-right: 5px;
+        }
+
+        button, label, input, select {
+            margin: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            vertical-align: middle;
+        }
+        input[type="text"], input[type="number"] {
+            width: 50px;
+            text-align: center;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 2px;
+        }
+        button:hover { background-color: #e0e0e0; }
+        button:active { background-color: #d0d0d0; }
+        button:disabled { cursor: not-allowed; opacity: 0.6; background-color: #eee; }
+        #speedValue, #resolutionValue {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 25px;
+            text-align: right;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 0 15px;
+            text-align: center;
+            color: #555;
+            max-width: 700px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .instructions strong { color: #222; }
+
+        /* Responsive adjustments */
+        @media (max-width: 850px) {
+            h1 { font-size: 1.5em; }
+            button, label, input, select {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            .controls-section { width: 95%; }
+        }
+        @media (max-width: 600px) {
+            .controls-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .control-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .control-group label, .control-group input, .control-group span, .control-group button {
+                width: auto; /* Allow natural width */
+                margin-top: 5px;
+            }
+            .seed-buttons-container button {
+                flex-basis: calc(33.33% - 10px); /* 3 buttons per row */
+                margin: 5px;
+            }
+        }
+        @media (max-width: 400px) {
+            .seed-buttons-container button {
+                flex-basis: calc(50% - 10px); /* 2 buttons per row */
+            }
+        }
+        .seed-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Conway's Game of Life - Enhanced</h1>
+
+    <main id="canvas-container"></main>
+
+    <div class="controls-section">
+        <strong>Simulation Controls</strong>
+        <button id="startPauseButton">Start</button>
+        <button id="stepButton">Step</button>
+        <button id="randomizeButton">Randomize</button>
+        <button id="clearButton">Clear</button>
+        <br>
+        <label for="speedSlider">Speed:</label>
+        <input type="range" id="speedSlider" min="1" max="60" value="10">
+        <span id="speedValue">10</span> fps
+    </div>
+
+    <div class="controls-section">
+        <strong>Grid & Appearance</strong>
+        <div class="control-group">
+            <label for="resolutionInput">Cell Size (px):</label>
+            <input type="number" id="resolutionInput" min="2" max="50" value="10">
+            <button id="applyResolutionButton">Apply Size</button>
+        </div>
+        <div class="control-group">
+            <input type="checkbox" id="deathByAgeCheckbox">
+            <label for="deathByAgeCheckbox">Death by Old Age (Max Age: <span id="maxAgeDisplay">50</span>)</label>
+        </div>
+    </div>
+
+    <div class="controls-section">
+        <strong>Game Rules (B/S Notation)</strong>
+        <div class="control-group">
+            <label for="birthRuleInput">Birth (B):</label>
+            <input type="text" id="birthRuleInput" value="3">
+        </div>
+        <div class="control-group">
+            <label for="survivalRuleInput">Survival (S):</label>
+            <input type="text" id="survivalRuleInput" value="23">
+        </div>
+        <button id="applyRulesButton">Apply Rules</button>
+    </div>
+
+    <div class="controls-section">
+        <strong>Seed Patterns</strong>
+        <div class="seed-buttons-container">
+            <button id="seedBlockButton">Block</button>
+            <button id="seedLoafButton">Loaf</button>
+            <button id="seedBlinkerButton">Blinker</button>
+            <button id="seedToadButton">Toad</button>
+            <button id="seedGliderButton">Glider</button>
+            <button id="seedRPentominoButton">R-pentomino</button>
+            <button id="seedLWSSButton">LWSS</button>
+            <button id="seedMWSSButton">MWSS</button>
+            <button id="seedHWSSButton">HWSS</button>
+            <button id="seedPulsarButton">Pulsar</button>
+            <button id="seedPentadecathlonButton">Pentadecathlon</button>
+            <button id="seedGosperGunButton">Gosper Glider Gun</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <p>Click cells to toggle them alive/dead when paused. Use buttons to control the simulation or seed specific patterns.</p>
+        <p><strong>Default Rules (B3/S23):</strong><br>
+           1. A living cell with fewer than two (<2) living neighbours dies (underpopulation).<br>
+           2. A living cell with two (2) or three (3) living neighbours lives on to the next generation.<br>
+           3. A living cell with more than three (>3) living neighbours dies (overpopulation).<br>
+           4. A dead cell with exactly three (3) living neighbours becomes a live cell (reproduction).
+        </p>
+    </div>
+
+    <script>
+        // --- Global Variables ---
+        let grid;
+        let cellAgeGrid; // For tracking age of cells
+        let cols;
+        let rows;
+        let resolution = 10;
+        const MAX_AGE = 50; // Max age before dying if "death by old age" is enabled
+        let enableDeathByAge = false;
+
+        let canvasWidth = Math.min(800, window.innerWidth - 40);
+        let canvasHeight = Math.min(600, window.innerHeight - 450); // Adjusted for more controls
+
+        let isRunning = false;
+        let generation = 0;
+
+        // Default Game of Life rules: B3/S23
+        let birthRules = [3];
+        let survivalRules = [2, 3];
+
+        // DOM Elements
+        let startPauseButton, stepButton, randomizeButton, clearButton, speedSlider, speedValueSpan;
+        let resolutionInput, applyResolutionButton, deathByAgeCheckbox, maxAgeDisplaySpan;
+        let birthRuleInput, survivalRuleInput, applyRulesButton;
+        // Seed pattern buttons will be selected inside setup
+
+        // --- Pattern Definitions ---
+        const patterns = {
+            Block: [[1, 1], [1, 1]],
+            Loaf: [[0, 1, 1, 0], [1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 0]],
+            Blinker: [[1, 1, 1]],
+            Toad: [[0, 1, 1, 1], [1, 1, 1, 0]],
+            Glider: [[0, 1, 0], [0, 0, 1], [1, 1, 1]],
+            RPentomino: [[0, 1, 1], [1, 1, 0], [0, 1, 0]],
+            LWSS: [[0,1,1,1,1],[1,0,0,0,1],[0,0,0,0,1],[1,0,1,0,0]], // Rotated for standard travel
+            MWSS: [[0,0,1,1,1,1],[0,1,0,0,0,1],[1,0,0,0,0,1],[0,0,0,0,0,1],[1,0,1,0,0,0]],
+            HWSS: [[0,0,1,1,1,1,1],[0,1,0,0,0,0,1],[1,0,0,0,0,0,1],[0,0,0,0,0,0,1],[1,0,1,0,0,0,0]],
+            Pentadecathlon: [[0,1,0,0,0,0,0,1,0], [1,1,1,0,0,0,1,1,1], [0,1,0,0,0,0,0,1,0]].map(row => [0,...row,0]), // Adding padding
+            Pulsar: [
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [1,0,0,0,0,1,0,1,0,0,0,0,1],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,1,1,1,0,0,0,1,1,1,0,0]
+            ],
+            GosperGliderGun: [
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+        };
+
+        function make2DArray(c, r, fillValue = 0) {
+            let arr = new Array(c);
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = new Array(r).fill(fillValue);
+            }
+            return arr;
+        }
+        
+        function setupCanvasAndGrid() {
+            canvasWidth = floor(Math.min(800, window.innerWidth - 40) / resolution) * resolution;
+            canvasHeight = floor(Math.min(600, window.innerHeight - document.body.clientHeight + canvasHeight) / resolution) * resolution; // Dynamic height attempt
+             // Fallback if calculation is off
+            if (canvasHeight < 100) canvasHeight = floor(400 / resolution) * resolution;
+
+
+            let canvas = createCanvas(canvasWidth, canvasHeight);
+            canvas.parent('canvas-container');
+            colorMode(HSB, 360, 100, 100, 100); // HSB mode for easier color manipulation
+
+            cols = floor(width / resolution);
+            rows = floor(height / resolution);
+
+            grid = make2DArray(cols, rows, 0);
+            cellAgeGrid = make2DArray(cols, rows, 0);
+            
+            initializeGridRandomly();
+        }
+
+        function setup() {
+            setupCanvasAndGrid();
+
+            // --- Get DOM Elements ---
+            startPauseButton = select('#startPauseButton');
+            stepButton = select('#stepButton');
+            randomizeButton = select('#randomizeButton');
+            clearButton = select('#clearButton');
+            speedSlider = select('#speedSlider');
+            speedValueSpan = select('#speedValue');
+
+            resolutionInput = select('#resolutionInput');
+            resolutionInput.value(resolution);
+            applyResolutionButton = select('#applyResolutionButton');
+            deathByAgeCheckbox = select('#deathByAgeCheckbox');
+            maxAgeDisplaySpan = select('#maxAgeDisplay');
+            maxAgeDisplaySpan.html(MAX_AGE);
+
+            birthRuleInput = select('#birthRuleInput');
+            survivalRuleInput = select('#survivalRuleInput');
+            applyRulesButton = select('#applyRulesButton');
+            birthRuleInput.value(birthRules.join(''));
+            survivalRuleInput.value(survivalRules.join(''));
+
+
+            // --- Attach Event Listeners ---
+            startPauseButton.mousePressed(toggleRunning);
+            stepButton.mousePressed(stepSimulation);
+            randomizeButton.mousePressed(handleRandomizeButton);
+            clearButton.mousePressed(handleClearButton);
+            speedSlider.input(updateSpeed);
+
+            applyResolutionButton.mousePressed(applyResolutionChange);
+            deathByAgeCheckbox.changed(() => {
+                enableDeathByAge = deathByAgeCheckbox.checked();
+            });
+
+            applyRulesButton.mousePressed(updateCustomRules);
+
+            // Seed pattern buttons
+            const seedButtonIds = {
+                'seedBlockButton': 'Block', 'seedLoafButton': 'Loaf', 'seedBlinkerButton': 'Blinker',
+                'seedToadButton': 'Toad', 'seedGliderButton': 'Glider', 'seedRPentominoButton': 'R-pentomino',
+                'seedLWSSButton': 'LWSS', 'seedMWSSButton': 'MWSS', 'seedHWSSButton': 'HWSS',
+                'seedPulsarButton': 'Pulsar', 'seedPentadecathlonButton': 'Pentadecathlon',
+                'seedGosperGunButton': 'GosperGliderGun'
+            };
+            for (const id in seedButtonIds) {
+                const button = select(`#${id}`);
+                if (button) {
+                    const patternName = seedButtonIds[id];
+                    button.mousePressed(() => seedPattern(patterns[patternName], patternName));
+                }
+            }
+
+            updateSpeed();
+            updateButtonStates();
+            updateCustomRulesDisplay(); // Display initial rules
+            noLoop();
+            redraw();
+        }
+
+        function initializeGridRandomly() {
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    grid[i][j] = (random(1) < 0.2) ? 1 : 0; // ~20% chance alive
+                    cellAgeGrid[i][j] = grid[i][j] === 1 ? 1 : 0;
+                }
+            }
+            generation = 0;
+        }
+
+        function draw() {
+            background(5, 5, 95); // Very light gray in HSB for background
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    if (grid[i][j] == 1) {
+                        let x = i * resolution;
+                        let y = j * resolution;
+                        
+                        let age = cellAgeGrid[i][j];
+                        let ageRatio = constrain(map(age, 1, MAX_AGE, 0, 1), 0, 1);
+                        
+                        // Color: Young (Green) -> Mid (Yellow/Orange) -> Old (Red)
+                        let hue = map(ageRatio, 0, 1, 120, 0); // 120 (Green) to 0 (Red)
+                        let saturation = 90 + ageRatio * 10; // Slightly more saturated as it ages
+                        let brightness = 90 - ageRatio * 20; // Slightly dimmer as it ages
+                        
+                        fill(hue, saturation, brightness);
+                        noStroke();
+                        rect(x, y, resolution -1 , resolution -1 ); // -1 for slight grid line effect
+                    }
+                }
+            }
+
+            if (isRunning) {
+                computeNextGeneration();
+                generation++;
+            }
+
+            // Display info on canvas
+            fill(0, 0, 20); // Dark text
+            noStroke();
+            textSize(14);
+            textAlign(LEFT, TOP);
+            text(`Generation: ${generation}`, 10, 10);
+            textAlign(RIGHT, TOP);
+            text(`Rules: B${birthRules.join('')}/S${survivalRules.join('')}`, width - 10, 10);
+        }
+
+        function computeNextGeneration() {
+            let nextGrid = make2DArray(cols, rows);
+            let nextAgeGrid = make2DArray(cols, rows);
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    let state = grid[i][j];
+                    let currentAge = cellAgeGrid[i][j];
+                    let neighbors = countNeighbors(grid, i, j);
+
+                    if (state == 0 && birthRules.includes(neighbors)) {
+                        nextGrid[i][j] = 1; // Birth
+                        nextAgeGrid[i][j] = 1;
+                    } else if (state == 1 && survivalRules.includes(neighbors)) {
+                        if (enableDeathByAge && currentAge >= MAX_AGE) {
+                            nextGrid[i][j] = 0; // Death by old age
+                            nextAgeGrid[i][j] = 0;
+                        } else {
+                            nextGrid[i][j] = 1; // Survival
+                            nextAgeGrid[i][j] = currentAge + 1;
+                        }
+                    } else {
+                        nextGrid[i][j] = 0; // Death by under/overpopulation or stays dead
+                        nextAgeGrid[i][j] = 0;
+                    }
+                }
+            }
+            grid = nextGrid;
+            cellAgeGrid = nextAgeGrid;
+        }
+
+        function countNeighbors(currentGrid, x, y) {
+            let sum = 0;
+            for (let i = -1; i < 2; i++) {
+                for (let j = -1; j < 2; j++) {
+                    if (i === 0 && j === 0) continue;
+                    let col = (x + i + cols) % cols;
+                    let row = (y + j + rows) % rows;
+                    sum += currentGrid[col][row];
+                }
+            }
+            return sum;
+        }
+
+        // --- Control Functions ---
+        function toggleRunning() {
+            isRunning = !isRunning;
+            if (isRunning) loop(); else noLoop();
+            updateButtonStates();
+        }
+
+        function stepSimulation() {
+            if (!isRunning) {
+                computeNextGeneration();
+                generation++;
+                redraw();
+            }
+        }
+        
+        function handleRandomizeButton() {
+            initializeGridRandomly();
+            if (isRunning) { isRunning = false; noLoop(); }
+            updateButtonStates();
+            redraw();
+        }
+
+        function handleClearButton() {
+            grid = make2DArray(cols, rows, 0);
+            cellAgeGrid = make2DArray(cols, rows, 0);
+            generation = 0;
+            if (isRunning) { isRunning = false; noLoop(); }
+            updateButtonStates();
+            redraw();
+            console.log("Grid cleared.");
+        }
+
+        function updateSpeed() {
+            let fpsVal = parseInt(speedSlider.value());
+            if (fpsVal === 0) fpsVal = 0.1; // Avoid division by zero for frameRate if slider allows 0
+            frameRate(fpsVal);
+            speedValueSpan.html(fpsVal);
+        }
+
+        function updateButtonStates() {
+            startPauseButton.html(isRunning ? 'Pause' : 'Start');
+            stepButton.attribute('disabled', isRunning ? '' : null);
+        }
+
+        function applyResolutionChange() {
+            let newRes = parseInt(resolutionInput.value());
+            if (newRes >= 2 && newRes <= 50) {
+                resolution = newRes;
+                if (isRunning) toggleRunning(); // Pause if running
+                // Re-setup canvas and grid
+                setupCanvasAndGrid();
+                updateButtonStates(); // Ensure buttons are correct after potential pause
+                redraw(); // Redraw with new resolution
+                console.log(`Resolution changed to ${resolution}px`);
+            } else {
+                alert("Resolution must be between 2 and 50.");
+                resolutionInput.value(resolution); // Reset to current
+            }
+        }
+
+        function parseRuleString(ruleStr) {
+            if (!ruleStr || typeof ruleStr !== 'string') return [];
+            return ruleStr.split('').map(s => parseInt(s)).filter(n => !isNaN(n) && n >= 0 && n <= 8);
+        }
+
+        function updateCustomRules() {
+            const bStr = birthRuleInput.value();
+            const sStr = survivalRuleInput.value();
+
+            const newBirthRules = parseRuleString(bStr);
+            const newSurvivalRules = parseRuleString(sStr);
+
+            if (newBirthRules.length > 0) birthRules = newBirthRules;
+            else birthRuleInput.value(birthRules.join('')); // Revert if invalid
+
+            if (newSurvivalRules.length > 0) survivalRules = newSurvivalRules;
+            else survivalRuleInput.value(survivalRules.join('')); // Revert if invalid
+            
+            updateCustomRulesDisplay();
+            console.log(`Rules updated: B${birthRules.join('')}/S${survivalRules.join('')}`);
+            if (!isRunning) redraw(); // Update display if paused
+        }
+        
+        function updateCustomRulesDisplay() {
+            // This function is mostly for external display if needed,
+            // as the canvas now draws the rules directly.
+            // Could update a dedicated HTML element if desired.
+            birthRuleInput.value(birthRules.join(''));
+            survivalRuleInput.value(survivalRules.join(''));
+        }
+
+
+        function seedPattern(patternArray, name) {
+            handleClearButton(); // Start with an empty, paused grid
+
+            const patternHeight = patternArray.length;
+            if (patternHeight === 0) return;
+            const patternWidth = patternArray[0].length;
+            if (patternWidth === 0) return;
+
+            const startRow = floor(rows / 2) - floor(patternHeight / 2);
+            const startCol = floor(cols / 2) - floor(patternWidth / 2);
+
+            let placedCount = 0;
+            for (let r = 0; r < patternHeight; r++) {
+                for (let c = 0; c < patternWidth; c++) {
+                    if (patternArray[r][c] === 1) {
+                        let gridRow = startRow + r;
+                        let gridCol = startCol + c;
+                        if (gridRow >= 0 && gridRow < rows && gridCol >= 0 && gridCol < cols) {
+                            grid[gridCol][gridRow] = 1;
+                            cellAgeGrid[gridCol][gridRow] = 1; // Seeded cells start at age 1
+                            placedCount++;
+                        }
+                    }
+                }
+            }
+            if (placedCount === 0 && patternHeight * patternWidth > 0) {
+                console.warn(`Pattern "${name}" is too large to fit on the current grid.`);
+                alert(`Pattern "${name}" is too large for the current grid configuration. Try reducing cell size or using a smaller pattern.`);
+            }
+
+            generation = 0;
+            if (isRunning) { isRunning = false; noLoop(); updateButtonStates(); }
+            redraw();
+            console.log(`Seeded pattern: ${name}`);
+        }
+
+        function mousePressed() {
+            if (!isRunning && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                let col = floor(mouseX / resolution);
+                let row = floor(mouseY / resolution);
+                if (col >= 0 && col < cols && row >= 0 && row < rows) {
+                    grid[col][row] = 1 - grid[col][row]; // Toggle state
+                    cellAgeGrid[col][row] = grid[col][row] === 1 ? 1 : 0; // Reset/set age
+                    redraw();
+                }
+            }
+        }
+
+        function mouseDragged() {
+            if (!isRunning && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                 let col = floor(mouseX / resolution);
+                 let row = floor(mouseY / resolution);
+                  if (col >= 0 && col < cols && row >= 0 && row < rows) {
+                    if (grid[col][row] === 0) { // Only draw on dead cells
+                        grid[col][row] = 1;
+                        cellAgeGrid[col][row] = 1; // Set age
+                        redraw();
+                    }
+                 }
+            }
+         }
+    </script>
+
+</body>
+</html>

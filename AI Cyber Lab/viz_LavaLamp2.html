@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromatic Emotions: A Lava Lamp Adventure</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  <style>
+    body {
+      font-family: 'Arial Black', sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #title-container {
+        text-align: center;
+        margin-bottom: 20px;
+        width: 90%;
+        max-width: 800px;
+    }
+    #description-container {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 0 15px;
+        color: #eeeeee;
+        font-size: clamp(16px, 2.5vw, 18px);
+        line-height: 1.5;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        width: 90%;
+        max-width: 800px;
+    }
+    #description-container ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px 15px;
+    }
+    #description-container ul li {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: clamp(12px, 2vw, 14px);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+    #description-container ul li:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    #controls-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px 30px; /* row column gap */
+      width: 95vw;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    #lamp-container {
+      flex: 1 1 clamp(280px, 40%, 400px);
+      min-width: 250px;
+      max-width: 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #p5-canvas {
+      width: 100%;
+      aspect-ratio: 350 / 500;
+      border-radius: 10px;
+      clip-path: polygon(50% 0%, 80% 10%, 85% 85%, 80% 100%, 20% 100%, 15% 85%, 20% 10%, 50% 0%);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.15));
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+    }
+
+    #sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 180px; /* Give sliders some base width */
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: clamp(14px, 2.2vw, 16px);
+      margin-bottom: 5px;
+    }
+    #joy-label { color: #ffff00; }
+    #sadness-label { color: #6c92ff; }
+    #anger-label { color: #ff4d4d; }
+    #fear-label { color: #00ff00; }
+    #trust-label { color: #00afaf; }
+    #disgust-label { color: #c500c5; }
+    #anticipation-label { color: #ffa500; }
+    #surprise-label { color: #ff00ff; }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 180px;
+      min-width: 120px;
+    }
+    
+    /* AI Controls Grouping */
+    #ai-interaction-area {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center; /* Center children like dropdown, button, text box */
+        min-width: 220px; /* Give it some width */
+    }
+
+    #ai-simulation-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%; /* Take full width of parent */
+    }
+
+    #ai-simulation-controls label {
+        font-size: clamp(13px, 2.1vw, 15px);
+        color: #ffdb58;
+    }
+
+    #ai-output-select {
+        padding: 8px;
+        border-radius: 5px;
+        background-color: #333;
+        color: white;
+        border: 1px solid #555;
+        font-family: 'Arial', sans-serif;
+        font-size: clamp(12px, 2vw, 14px);
+        width: 100%;
+        max-width: 250px; /* Max width for dropdown */
+    }
+
+    #ai-output-text-container {
+        background-color: #080808; /* Dark black */
+        color: #00ff00; /* Bright green */
+        font-family: 'Courier New', Courier, monospace;
+        font-size: clamp(12px, 1.8vw, 14px);
+        padding: 15px;
+        border: 1px solid #004d00; /* Darker green border */
+        border-radius: 5px;
+        min-height: 100px; /* Ensure it has some height */
+        width: 100%;
+        max-width: 300px; /* Max width for text box */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        overflow-y: auto; /* Add scroll if text overflows */
+        white-space: pre-wrap; /* Preserve whitespace and wrap text */
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    }
+    #ai-output-text-container .cursor {
+        display: inline-block;
+        background-color: #00ff00;
+        width: 8px;
+        height: 1.2em;
+        animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+        from, to { background-color: transparent; }
+        50% { background-color: #00ff00; }
+    }
+
+
+    #random-ai-controls { /* Renamed for clarity */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+         width: 100%;
+        max-width: 250px;
+    }
+    #random-ai-controls button {
+        background-color: #ffdb58;
+        color: #333;
+        border: none;
+        padding: 10px 15px;
+        font-family: 'Arial Black', sans-serif;
+        font-size: clamp(12px, 2vw, 14px);
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+    #random-ai-controls button:hover {
+        background-color: #ffe135;
+    }
+    #random-ai-controls p {
+        font-size: clamp(10px, 1.8vw, 12px);
+        color: #aaa;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="title-container">
+    <h1 style="font-family: 'Arial Black', sans-serif; color: #ffe135; text-shadow: 2px 2px 4px #000000; font-size: clamp(24px, 5vw, 36px);">Chromatic Emotions: A Lava Lamp Adventure</h1>
+  </div>
+  <div id="description-container">
+    <p>Dive into a vibrant world of feelings! Use the sliders, select a pre-defined AI sentiment, or simulate a random AI update to blend colors and unleash a symphony of emotions within the Chromatic Emotions Lava Lamp.</p>
+    <ul style="margin-top: 20px;">
+      <li><span style="color: #ffff00;">💛</span> Joy (Yellow)</li>
+      <li><span style="color: #6c92ff;">💙</span> Sadness (Blue)</li>
+      <li><span style="color: #ff4d4d;">❤️</span> Anger (Red)</li>
+      <li><span style="color: #00ff00;">💚</span> Fear (Green)</li>
+      <li><span style="color: #00afaf;">■</span> Trust (Teal)</li>
+      <li><span style="color: #c500c5;">💜</span> Disgust (Purple)</li>
+      <li><span style="color: #ffa500;">🧡</span> Anticipation (Orange)</li>
+      <li><span style="color: #ff00ff;">💖</span> Surprise (Magenta)</li>
+    </ul>
+  </div>
+  <div id="controls-container">
+    <div id="lamp-container">
+      <div id="p5-canvas"></div>
+    </div>
+    <div id="sliders">
+      <!-- Slider groups ... -->
+      <div class="slider-group"> <label id="joy-label" for="joy">Joy</label> <input type="range" id="joy" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="sadness-label" for="sadness">Sadness</label> <input type="range" id="sadness" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="anger-label" for="anger">Anger</label> <input type="range" id="anger" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="fear-label" for="fear">Fear</label> <input type="range" id="fear" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="trust-label" for="trust">Trust</label> <input type="range" id="trust" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="disgust-label" for="disgust">Disgust</label> <input type="range" id="disgust" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="anticipation-label" for="anticipation">Anticipation</label> <input type="range" id="anticipation" min="0" max="100" value="50"> </div>
+      <div class="slider-group"> <label id="surprise-label" for="surprise">Surprise</label> <input type="range" id="surprise" min="0" max="100" value="50"> </div>
+    </div>
+    <div id="ai-interaction-area">
+        <div id="ai-simulation-controls">
+            <label for="ai-output-select">Select Simulated AI Output:</label>
+            <select id="ai-output-select">
+                <option value="">--Choose AI Scenario--</option>
+            </select>
+            <div id="ai-output-text-container">Select an AI scenario to see its output here...</div>
+        </div>
+        <div id="random-ai-controls">
+            <button id="simulate-random-ai-btn">Simulate Random AI Update</button>
+            <p>
+                Click to randomly update emotion levels, mimicking uncurated AI sentiment.
+            </p>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    let blobs = [];
+    let emotionSliders = {};
+    let p5CanvasDiv;
+    let p5CanvasInstance;
+
+    const emotionBaseColors = {
+        joy: null, sadness: null, anger: null, fear: null,
+        trust: null, disgust: null, anticipation: null, surprise: null
+    };
+
+    const sampleAIOutputs = [
+        {
+            name: "AI: Pure Elation & Success",
+            text: "SYSTEM STATUS: OVERJOYED!\nProject Phoenix has achieved 100% mission success. All key performance indicators are green. Projections estimate a 200% return on investment. The future is BRIGHT!",
+            emotions: { joy: 95, sadness: 2, anger: 1, fear: 3, trust: 80, disgust: 1, anticipation: 90, surprise: 70 }
+            // Expected Viz: Dominantly yellow/orange/magenta. Large, very active blobs. Bright overall lamp glow.
+        },
+        {
+            name: "AI: Somber Warning & High Risk",
+            text: "CRITICAL ALERT:\nAnomaly detected in Sector 7-Gamma. System integrity at 15%. Containment protocols failing. Imminent catastrophic failure probability: 85%. All personnel evacuate immediately. This is not a drill.",
+            emotions: { joy: 5, sadness: 85, anger: 40, fear: 95, trust: 10, disgust: 60, anticipation: 20, surprise: 50 }
+            // Expected Viz: Dark, murky. Predominantly blue, green, purple. Slower, perhaps more erratic blobs. Dimmer, unsettling glow.
+        },
+        {
+            name: "AI: Complex & Conflicted Analysis",
+            text: "ANALYSIS COMPLETE:\nSubject exhibits contradictory behavior. Strong indicators of deception (Anger: 70) yet underlying cooperative signals (Trust: 60). Potential for unpredictable outcome (Surprise: 80). Proceed with cautious optimism (Anticipation: 55).",
+            emotions: { joy: 20, sadness: 30, anger: 75, fear: 40, trust: 65, disgust: 25, anticipation: 55, surprise: 80 }
+            // Expected Viz: A chaotic mix of red, teal, magenta. Active but possibly clashing movements. A vibrant but unstable lamp color.
+        },
+        {
+            name: "AI: Calm & Neutral Observation",
+            text: "SYSTEM LOG:\nAll systems operating within nominal parameters. No anomalies detected. Ambient emotional noise low. Current outlook: stable. Monitoring continues.",
+            emotions: { joy: 25, sadness: 20, anger: 10, fear: 15, trust: 70, disgust: 5, anticipation: 30, surprise: 10 }
+            // Expected Viz: More subdued, calmer lamp. Teal might be prominent due to trust. Blobs smaller, slower. Overall glow is gentle.
+        }
+    ];
+
+    let currentTypewriterTimeout; // To clear existing typewriter effect
+
+    function typewriterEffect(element, text, speed = 50, callback) {
+        clearTimeout(currentTypewriterTimeout); // Clear any ongoing typing
+        element.innerHTML = ""; // Clear previous text
+        let i = 0;
+        const cursorSpan = '<span class="cursor"></span>';
+        element.innerHTML = cursorSpan; // Show cursor immediately
+
+        function type() {
+            if (i < text.length) {
+                element.innerHTML = text.substring(0, i + 1) + cursorSpan;
+                i++;
+                currentTypewriterTimeout = setTimeout(type, speed);
+            } else {
+                element.innerHTML = text; // Remove cursor when done
+                if (callback) callback();
+            }
+        }
+        currentTypewriterTimeout = setTimeout(type, speed);
+    }
+
+    function populateAIDropdown() {
+        const selectElement = document.getElementById('ai-output-select');
+        sampleAIOutputs.forEach((output, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = output.name;
+            selectElement.appendChild(option);
+        });
+
+        selectElement.addEventListener('change', function() {
+            if (this.value === "") {
+                document.getElementById('ai-output-text-container').textContent = "Select an AI scenario to see its output here...";
+                // Optionally reset sliders to default or do nothing
+                return;
+            }
+            const selectedOutput = sampleAIOutputs[this.value];
+            const textContainer = document.getElementById('ai-output-text-container');
+            
+            typewriterEffect(textContainer, selectedOutput.text, 30); // Adjust speed as needed
+
+            for (const emotion in selectedOutput.emotions) {
+                if (emotionSliders[emotion]) {
+                    emotionSliders[emotion].value = selectedOutput.emotions[emotion];
+                }
+            }
+        });
+    }
+
+
+    function initializeBlobs() {
+        // ... (same as before)
+        blobs = []; 
+        const emotions = Object.keys(emotionBaseColors);
+        for (let i = 0; i < emotions.length; i++) {
+            const emotionName = emotions[i];
+            let blob = {
+                color: emotionBaseColors[emotionName],
+                centerX: map(i, 0, emotions.length - 1, width * 0.2, width * 0.8),
+                velX: random(-0.5, 0.5),
+                amplitude: random(height * 0.14, height * 0.28), 
+                phase: random(TWO_PI),
+                noiseOffset: random(1000),
+                emotion: emotionName,
+                history: []
+            };
+            blobs.push(blob);
+        }
+    }
+
+    function setup() {
+      p5CanvasDiv = document.getElementById('p5-canvas');
+      let canvasWidth = p5CanvasDiv.offsetWidth;
+      let canvasHeight = p5CanvasDiv.offsetHeight;
+      p5CanvasInstance = createCanvas(canvasWidth, canvasHeight);
+      p5CanvasInstance.parent('p5-canvas');
+
+      emotionBaseColors.joy = color(255, 255, 0);
+      emotionBaseColors.sadness = color(108, 146, 255);
+      emotionBaseColors.anger = color(255, 77, 77);
+      emotionBaseColors.fear = color(0, 255, 0);
+      emotionBaseColors.trust = color(0, 175, 175);
+      emotionBaseColors.disgust = color(197, 0, 197);
+      emotionBaseColors.anticipation = color(255, 165, 0);
+      emotionBaseColors.surprise = color(255, 0, 255);
+
+      emotionSliders = {
+        joy: document.getElementById('joy'),
+        sadness: document.getElementById('sadness'),
+        anger: document.getElementById('anger'),
+        fear: document.getElementById('fear'),
+        trust: document.getElementById('trust'),
+        disgust: document.getElementById('disgust'),
+        anticipation: document.getElementById('anticipation'),
+        surprise: document.getElementById('surprise')
+      };
+
+      initializeBlobs();
+
+      document.getElementById('simulate-random-ai-btn').addEventListener('click', simulateRandomAIUpdate);
+      populateAIDropdown();
+    }
+
+    function draw() {
+        // ... (draw logic remains largely the same)
+      if (!width || !height) return; 
+
+      let totalValue = 0;
+      let rSum = 0, gSum = 0, bSum = 0;
+
+      for (const emotion in emotionSliders) {
+          const sliderVal = parseInt(emotionSliders[emotion].value);
+          const baseC = emotionBaseColors[emotion];
+          if (!baseC) continue; 
+          
+          rSum += red(baseC) * sliderVal;
+          gSum += green(baseC) * sliderVal;
+          bSum += blue(baseC) * sliderVal;
+          totalValue += sliderVal;
+      }
+
+      let finalMixedColor;
+      if (totalValue === 0) {
+          finalMixedColor = color(30, 30, 50);
+      } else {
+          finalMixedColor = color(rSum / totalValue, gSum / totalValue, bSum / totalValue);
+      }
+
+      let fluidBaseColor = color(20, 20, 40);
+      let fluidBg = lerpColor(fluidBaseColor, finalMixedColor, 0.65);
+      background(red(fluidBg), green(fluidBg), blue(fluidBg), 230);
+
+      let cssMixedColor = `rgba(${floor(red(finalMixedColor))}, ${floor(green(finalMixedColor))}, ${floor(blue(finalMixedColor))}, 0.6)`;
+      let cssMixedColorStronger = `rgba(${floor(red(finalMixedColor))}, ${floor(green(finalMixedColor))}, ${floor(blue(finalMixedColor))}, 0.8)`;
+      if (p5CanvasDiv) {
+          p5CanvasDiv.style.boxShadow = `0 0 30px ${cssMixedColor}, 0 0 50px ${cssMixedColorStronger}`;
+          p5CanvasDiv.style.filter = `drop-shadow(0 0 20px ${cssMixedColor})`;
+      }
+      
+      drawingContext.shadowColor = `rgba(${floor(red(finalMixedColor))}, ${floor(green(finalMixedColor))}, ${floor(blue(finalMixedColor))}, 0.7)`;
+      drawingContext.shadowBlur = 30;
+      noStroke();
+
+      for (let blob of blobs) {
+        for (let j = 0; j < blob.history.length; j++) {
+          let pos = blob.history[j];
+          let trailOpacity = map(j, 0, blob.history.length - 1, 60, 0);
+          let trailSize = map(j, 0, blob.history.length - 1, pos.radius * 0.8, pos.radius * 0.2);
+          drawBlobShape(pos.x, pos.y, trailSize, blob.color, trailOpacity, pos.stretch);
+        }
+      }
+
+      for (let blob of blobs) {
+        let sliderValue = parseInt(emotionSliders[blob.emotion].value);
+        let radius = map(sliderValue, 0, 100, width * 0.04, width * 0.18);
+        let speed = map(sliderValue, 0, 100, 0.005, 0.03);
+
+        let centerY = height / 2 + blob.amplitude * sin(speed * frameCount + blob.phase);
+        
+        let verticalSpeed = blob.amplitude * speed * cos(speed * frameCount + blob.phase);
+        let maxSpeed = blob.amplitude * speed;
+        let stretch = 1;
+        if (maxSpeed > 0) {
+             stretch = 1 + 0.4 * abs(verticalSpeed / maxSpeed);
+        }
+
+        blob.centerX += blob.velX;
+        blob.velX += random(-0.1, 0.1);
+        blob.velX = constrain(blob.velX, -1.5, 1.5);
+
+        blob.history.push({ x: blob.centerX, y: centerY, radius: radius, stretch: stretch });
+        if (blob.history.length > 20) {
+          blob.history.shift();
+        }
+
+        let effectiveRadius = (radius / stretch) * 0.8; 
+        if (blob.centerX - effectiveRadius < 0) {
+          blob.centerX = effectiveRadius;
+          blob.velX *= -0.7;
+        } else if (blob.centerX + effectiveRadius > width) {
+          blob.centerX = width - effectiveRadius;
+          blob.velX *= -0.7;
+        }
+        
+        drawBlobShape(blob.centerX, centerY, radius, blob.color, 180, stretch);
+      }
+      drawingContext.shadowBlur = 0;
+    }
+
+    function drawBlobShape(centerX, centerY, radius, blobC, alpha, stretchFactor) {
+        // ... (same as before)
+      if (!blobC) return; 
+      fill(red(blobC), green(blobC), blue(blobC), alpha);
+      beginShape();
+      let numPoints = 20;
+      for (let i = 0; i < numPoints; i++) {
+        let angle = i * TWO_PI / numPoints;
+        let xOff = (radius / stretchFactor) * cos(angle);
+        let yOff = (radius * stretchFactor) * sin(angle);
+        
+        let noiseMagnitude = radius * 0.25; 
+        let rLevel = (blobC.levels && blobC.levels[0]) ? blobC.levels[0] : 100;
+        let gLevel = (blobC.levels && blobC.levels[1]) ? blobC.levels[1] : 100;
+
+        let nX = map(noise(rLevel * 0.01 + i * 0.2, frameCount * 0.01 + centerX * 0.005), 0, 1, -noiseMagnitude, noiseMagnitude);
+        let nY = map(noise(gLevel * 0.01 + 100 + i * 0.2, frameCount * 0.01 + centerY * 0.005), 0, 1, -noiseMagnitude, noiseMagnitude);
+        
+        vertex(centerX + xOff + nX, centerY + yOff + nY);
+      }
+      endShape(CLOSE);
+    }
+
+    function simulateRandomAIUpdate() { // Renamed for clarity
+        for (const emotion in emotionSliders) {
+            const randomValue = Math.floor(Math.random() * 101);
+            emotionSliders[emotion].value = randomValue;
+        }
+         // Clear AI output text or set a generic message
+        const textContainer = document.getElementById('ai-output-text-container');
+        typewriterEffect(textContainer, "Random sentiment generated...\nNo specific AI scenario selected.", 30);
+    }
+
+    function windowResized() {
+        // ... (same as before)
+      if (!p5CanvasDiv) return; 
+
+      let newCanvasWidth = p5CanvasDiv.offsetWidth;
+      let newCanvasHeight = p5CanvasDiv.offsetHeight; 
+      
+      if (newCanvasWidth > 0 && newCanvasHeight > 0 && (newCanvasWidth !== width || newCanvasHeight !== height)) {
+          resizeCanvas(newCanvasWidth, newCanvasHeight);
+          initializeBlobs(); 
+      }
+    }
+
+  </script>
+</body>
+</html>
