@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromatic Emotions: A Lava Lamp Adventure</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  <style>
+    body {
+      font-family: 'Arial Black', sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
+    }
+    #container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+    #lamp-container {
+      position: relative;
+      width: 400px;
+      height: 700px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #p5-canvas {
+      width: 350px;
+      height: 500px;
+      margin-top: 100px;
+      border-radius: 10px;
+      clip-path: polygon(50% 0%, 80% 10%, 85% 85%, 80% 100%, 20% 100%, 15% 85%, 20% 10%, 50% 0%);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+    }
+    #lamp-base {
+      display: none;
+    }
+    #lamp-cap {
+      display: none;
+    }
+    #sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 16px;
+      margin-bottom: 5px;
+      color: #ffdb58;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    #joy-label { color: #ffff00; }
+    #sadness-label { color: #0000ff; }
+    #anger-label { color: #ff0000; }
+    #fear-label { color: #00ff00; }
+    #trust-label { color: #008080; }
+    #disgust-label { color: #800080; }
+    #anticipation-label { color: #ffa500; }
+    #surprise-label { color: #ff00ff; }
+
+    input[type="range"] {
+      width: 150px;
+    }
+    #title-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    #description-container {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 0 20px;
+        color: #eeeeee;
+        font-size: 18px;
+        line-height: 1.5;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    }
+    #description-container ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    #description-container ul li {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+    #description-container ul li:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="title-container">
+    <h1 style="font-family: 'Arial Black', sans-serif; color: #ffe135; text-shadow: 2px 2px 4px #000000;">Chromatic Emotions: A Lava Lamp Adventure</h1>
+  </div>
+  <div id="description-container">
+    <p>Dive into a vibrant world of feelings!  Use the sliders to blend colors and unleash a symphony of emotions within the Chromatic Emotions Lava Lamp.</p>
+    <ul style="margin-top: 20px;">
+      <li><span style="color: #ffff00;">💛</span> Joy (Yellow)</li>
+      <li><span style="color: #0000ff;">💙</span> Sadness (Blue)</li>
+      <li><span style="color: #ff0000;">❤️</span> Anger (Red)</li>
+      <li><span style="color: #00ff00;">💚</span> Fear (Green)</li>
+      <li><span style="color: #008080;">Teal</span> Trust (Teal)</li>
+      <li><span style="color: #800080;">💜</span> Disgust (Purple)</li>
+      <li><span style="color: #ffa500;">🧡</span> Anticipation (Orange)</li>
+      <li><span style="color: #ff00ff;">💖</span> Surprise (Magenta)</li>
+    </ul>
+  </div>
+  <div id="container">
+    <div id="lamp-container">
+      <div id="p5-canvas"></div>
+    </div>
+    <div id="sliders">
+      <div class="slider-group">
+        <label id="joy-label" for="joy">Joy (Yellow)</label>
+        <input type="range" id="joy" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="sadness-label" for="sadness">Sadness (Blue)</label>
+        <input type="range" id="sadness" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="anger-label" for="anger">Anger (Red)</label>
+        <input type="range" id="anger" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="fear-label" for="fear">Fear (Green)</label>
+        <input type="range" id="fear" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="trust-label" for="trust">Trust (Teal)</label>
+        <input type="range" id="trust" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="disgust-label" for="disgust">Disgust (Purple)</label>
+        <input type="range" id="disgust" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="anticipation-label" for="anticipation">Anticipation (Orange)</label>
+        <input type="range" id="anticipation" min="0" max="100" value="50">
+      </div>
+      <div class="slider-group">
+        <label id="surprise-label" for="surprise">Surprise (Magenta)</label>
+        <input type="range" id="surprise" min="0" max="100" value="50">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let blobs = [];
+    let colors = [];
+    let emotionSliders = {};
+    let trails = [];
+
+    function setup() {
+      let canvas = createCanvas(350, 500);
+      canvas.parent('p5-canvas');
+
+      colors = [
+        color(255, 255, 0),
+        color(0, 0, 255),
+        color(255, 0, 0),
+        color(0, 255, 0),
+        color(0, 128, 128),
+        color(128, 0, 128),
+        color(255, 165, 0),
+        color(255, 0, 255)
+      ];
+
+      emotionSliders = {
+        joy: document.getElementById('joy'),
+        sadness: document.getElementById('sadness'),
+        anger: document.getElementById('anger'),
+        fear: document.getElementById('fear'),
+        trust: document.getElementById('trust'),
+        disgust: document.getElementById('disgust'),
+        anticipation: document.getElementById('anticipation'),
+        surprise: document.getElementById('surprise')
+      };
+
+      let emotions = ['joy', 'sadness', 'anger', 'fear', 'trust', 'disgust', 'anticipation', 'surprise'];
+      for (let i = 0; i < 8; i++) {
+        let blob = {
+          color: colors[i],
+          centerX: map(i, 0, 7, 100, 250),
+          velX: random(-1, 1),
+          baseRadius: 40,
+          baseSpeed: 0.02,
+          amplitude: random(80, 150),
+          phase: random(TWO_PI),
+          noiseOffset: random(1000),
+          emotion: emotions[i],
+          history: []
+        };
+        blobs.push(blob);
+      }
+    }
+
+    function draw() {
+      background(20, 20, 40, 200);
+      noStroke();
+
+      let joyValue = parseInt(emotionSliders.joy.value);
+      let sadnessValue = parseInt(emotionSliders.sadness.value);
+      let angerValue = parseInt(emotionSliders.anger.value);
+      let fearValue = parseInt(emotionSliders.fear.value);
+      let trustValue = parseInt(emotionSliders.trust.value);
+      let disgustValue = parseInt(emotionSliders.disgust.value);
+      let anticipationValue = parseInt(emotionSliders.anticipation.value);
+      let surpriseValue = parseInt(emotionSliders.surprise.value);
+
+      let mixedColor = color(
+        map(joyValue, 0, 100, 0, 255),
+        map(sadnessValue, 0, 100, 0, 0),
+        map(angerValue, 0, 100, 0, 0),
+        map(fearValue, 0, 100, 0, 0),
+        map(trustValue, 0, 100, 0, 128),
+        map(disgustValue, 0, 100, 0, 0),
+        map(anticipationValue, 0, 100, 0, 165),
+        map(surpriseValue, 0, 100, 0, 0)
+      );
+
+      // Apply the glow effect with the mixed color
+      drawingContext.shadowColor = mixedColor;
+      drawingContext.shadowBlur = 25;
+
+      for (let i = 0; i < blobs.length; i++) {
+        let blob = blobs[i];
+        for (let j = 0; j < blob.history.length; j++) {
+          let pos = blob.history[j];
+          let opacity = map(j, 0, blob.history.length - 1, 80, 0);
+          let size = map(j, 0, blob.history.length - 1, blob.history[j].radius, 5);
+          fill(red(blob.color), green(blob.color), blue(blob.color), opacity);
+          drawBlobShape(pos.x, pos.y, size, blob.color, opacity, blob.history[j].stretch);
+        }
+      }
+
+      for (let blob of blobs) {
+        let sliderValue = parseInt(emotionSliders[blob.emotion].value);
+        let radius = map(sliderValue, 0, 100, 10, 100);
+        let speed = map(sliderValue, 0, 100, 0.01, 0.04);
+
+        let centerY = height / 2 + blob.amplitude * sin(speed * frameCount + blob.phase);
+        let verticalSpeed = blob.amplitude * speed * cos(speed * frameCount + blob.phase);
+        let maxSpeed = blob.amplitude * speed;
+        let stretch = 1 + 0.5 * abs(verticalSpeed / maxSpeed);
+
+        blob.centerX += blob.velX;
+        blob.velX += random(-0.2, 0.2);
+        blob.velX = constrain(blob.velX, -2, 2);
+
+        blob.history.push({ x: blob.centerX, y: centerY, radius: radius, stretch: stretch });
+        if (blob.history.length > 15) {
+          blob.history.shift();
+        }
+
+        let leftBound = 0;
+        let rightBound = width;
+
+        if (blob.centerX - radius < leftBound) {
+          blob.centerX = leftBound + radius;
+          blob.velX *= -0.8;
+        } else if (blob.centerX + radius > rightBound) {
+          blob.centerX = rightBound - radius;
+          blob.velX *= -0.8;
+        }
+
+        fill(red(blob.color), green(blob.color), blue(blob.color), 120);
+        drawBlobShape(blob.centerX, centerY, radius, blob.color, 120, stretch);
+      }
+      drawingContext.shadowBlur = 0;
+    }
+
+    function drawBlobShape(centerX, centerY, radius, blobColor, opacity, stretch) {
+      fill(red(blobColor), green(blobColor), blue(blobColor), opacity);
+      beginShape();
+      for (let i = 0; i < 20; i++) {
+        let angle = i * TWO_PI / 20;
+        let xOffset = radius * cos(angle);
+        let yOffset = radius * sin(angle);
+        let stretchedXOffset = xOffset / stretch;
+        let stretchedYOffset = yOffset * stretch;
+        let baseX = centerX + stretchedXOffset;
+        let baseY = centerY + stretchedYOffset;
+        let noiseX = map(noise(i * 0.1, frameCount * 0.01), 0, 1, -30, 30);
+        let noiseY = map(noise(100 + i * 0.1, frameCount * 0.01), 0, 1, -30, 30);
+        vertex(baseX + noiseX, baseY + noiseY);
+      }
+      endShape(CLOSE);
+    }
+  </script>
+</body>
+</html>

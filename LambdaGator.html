@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alligator Eggs - Lambda Calculus Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: #2a2a2a;
+            border: 4px solid #555;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .game-board {
+            display: flex;
+            flex-wrap: wrap; /* Allow families to wrap */
+            gap: 20px; /* Spacing between families */
+            min-height: 300px;
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #444;
+            margin-bottom: 20px;
+            align-items: flex-start; /* Align families at the top */
+            overflow-x: auto; /* Allow horizontal scrolling if many families */
+        }
+
+        .family-container {
+            /* Represents a top-level expression that can be eaten */
+            display: flex;
+            flex-direction: column; /* Alligator is on top, children below */
+            align-items: center;
+            padding: 5px;
+            border: 2px dashed #666; /* Dashed border for family units */
+            border-radius: 5px;
+            min-width: 80px; /* Minimum width for a family */
+        }
+
+        .element {
+            display: flex;
+            flex-direction: column; /* Alligator head, then body for children */
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            padding: 5px;
+            border-radius: 5px;
+            position: relative; /* For pseudo-elements if needed */
+            user-select: none; /* Prevent text selection */
+            min-width: 60px;
+        }
+
+        .alligator {
+            border: 2px solid;
+            background-color: currentColor; /* Will be set by JS based on color property */
+            min-height: 50px;
+            width: 100%; /* Take width of its container in family */
+        }
+        
+        .alligator-head {
+            width: 100%;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Eye to the right for hungry gator */
+            padding-right: 5px;
+            position: relative;
+        }
+
+        .alligator-head::before { /* Mouth shape */
+            content: '';
+            position: absolute;
+            left: -10px; /* Extend to the left */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid; /* Same color as border */
+            border-right-color: inherit; /* Inherits from .alligator border color */
+        }
+        
+        .alligator.old .alligator-head::before { /* Old gator mouth closed or different */
+            border-right-width: 5px;
+            border-left: 5px solid;
+            border-left-color: inherit;
+            border-right-color: transparent; /* No pointy mouth */
+            left: -5px;
+        }
+
+
+        .eye {
+            width: 8px;
+            height: 8px;
+            background-color: #000;
+            border-radius: 50%;
+            border: 1px solid #fff;
+        }
+        
+        .alligator.old .eye {
+            background-color: #555; /* Closed or sleepy eye */
+            width: 10px;
+            height: 2px;
+            border-radius: 0;
+        }
+
+        .alligator-body {
+            display: flex;
+            flex-direction: row; /* Children are side-by-side inside the body */
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 8px;
+            margin-top: 2px; /* Small gap between head and body */
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter to show containment */
+            border-radius: 0 0 3px 3px;
+            min-height: 30px;
+            width: 100%;
+        }
+
+        .egg {
+            width: 30px;
+            height: 30px;
+            border: 2px solid;
+            background-color: currentColor; /* Set by JS */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px; /* For color initial if needed */
+            color: #111; /* Text color inside egg */
+        }
+
+        /* Color Variables (tailwind can also be used, but this is explicit for game elements) */
+        .color-red { color: #ef4444; border-color: #dc2626; }
+        .color-green { color: #22c55e; border-color: #16a34a; }
+        .color-blue { color: #3b82f6; border-color: #2563eb; }
+        .color-yellow { color: #eab308; border-color: #ca8a04; }
+        .color-purple { color: #a855f7; border-color: #9333ea; }
+        .color-orange { color: #f97316; border-color: #ea580c; }
+        .color-gray { color: #6b7280; border-color: #4b5563; } /* For old alligators */
+
+
+        .controls, .palette, .messages {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border: 2px solid #555;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+        }
+        .controls button, .palette button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 2px #999;
+            transition: all 0.1s ease-in-out;
+        }
+        .controls button:hover, .palette button:hover {
+            background-color: #45a049;
+        }
+        .controls button:active, .palette button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 1px #666;
+            transform: translateY(1px);
+        }
+        #message-area {
+            min-height: 40px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #a0aec0; /* Light gray-blue text */
+            font-size: 0.8em;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-3xl mb-6 text-yellow-400 tracking-wider">Alligator Eggs: Lambda Calculus</h1>
+
+    <div class="game-container">
+        <h2 class="text-xl mb-3 text-center text-green-400">Game Board</h2>
+        <div id="game-board" class="game-board">
+            </div>
+
+        <div class="palette mt-4">
+            <h3 class="text-lg mb-2 text-center text-blue-400">Create Elements (Simplified)</h3>
+            <button id="add-gator-red">Add Red Gator (λr)</button>
+            <button id="add-gator-green">Add Green Gator (λg)</button>
+            <button id="add-egg-red">Add Red Egg (r)</button>
+            <button id="add-egg-green">Add Green Egg (g)</button>
+            <button id="add-example-1">Add Example: (λg. g) (λr.r)</button>
+        </div>
+
+        <div class="controls mt-4">
+            <h3 class="text-lg mb-2 text-center text-orange-400">Actions</h3>
+            <button id="step-button">Step (Eat)</button>
+            <button id="reset-button">Reset Board</button>
+        </div>
+
+        <div class="messages mt-4">
+            <h3 class="text-lg mb-2 text-center text-purple-400">Messages</h3>
+            <div id="message-area">Welcome to Alligator Eggs! Arrange families and press Step.</div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURES ---
+        let elementIdCounter = 0;
+        const boardElements = []; // Array to hold top-level families on the board
+
+        /**
+         * Creates a new game element.
+         * @param {string} type - 'alligator' or 'egg'
+         * @param {string} color - e.g., 'red', 'green'
+         * @param {boolean} [isHungry=true] - For alligators
+         * @param {boolean} [isOld=false] - For alligators
+         * @param {Array} [children=[]] - For alligators, elements they guard
+         * @returns {object} The element object
+         */
+        function createElement(type, color, isHungry = true, isOld = false, children = []) {
+            elementIdCounter++;
+            return {
+                id: `el-${elementIdCounter}`,
+                type,
+                color,
+                isHungry: type === 'alligator' ? isHungry : undefined,
+                isOld: type === 'alligator' ? isOld : undefined,
+                children: type === 'alligator' ? children.map(child => ({...child})) : undefined, // Deep copy children
+            };
+        }
+
+        // --- DOM RENDERING ---
+        const gameBoard = document.getElementById('game-board');
+        const messageArea = document.getElementById('message-area');
+
+        /**
+         * Renders a single element and its children recursively.
+         * @param {object} elementData - The element data object.
+         * @returns {HTMLElement} The rendered DOM element.
+         */
+        function renderElement(elementData) {
+            const elementDiv = document.createElement('div');
+            elementDiv.classList.add('element', `color-${elementData.color}`);
+            elementDiv.dataset.id = elementData.id;
+
+            if (elementData.type === 'alligator') {
+                elementDiv.classList.add('alligator');
+                if (elementData.isOld) {
+                    elementDiv.classList.add('old', 'color-gray'); // Old gators are gray
+                    elementDiv.classList.remove(`color-${elementData.color}`);
+                } else if (!elementData.isHungry) {
+                    // Style for a non-hungry (but not old) gator if needed
+                    // For now, only old gators are visually distinct beyond color
+                }
+
+                const head = document.createElement('div');
+                head.classList.add('alligator-head');
+                const eye = document.createElement('div');
+                eye.classList.add('eye');
+                head.appendChild(eye);
+                elementDiv.appendChild(head);
+
+                const body = document.createElement('div');
+                body.classList.add('alligator-body');
+                if (elementData.children && elementData.children.length > 0) {
+                    elementData.children.forEach(childData => {
+                        body.appendChild(renderElement(childData));
+                    });
+                } else {
+                    body.textContent = ''; // Empty body if no children
+                }
+                elementDiv.appendChild(body);
+
+            } else if (elementData.type === 'egg') {
+                elementDiv.classList.add('egg');
+                // elementDiv.textContent = elementData.color.charAt(0).toUpperCase(); // Optional: show color initial
+            }
+            return elementDiv;
+        }
+
+        /**
+         * Renders all top-level families to the game board.
+         */
+        function renderBoard() {
+            gameBoard.innerHTML = ''; // Clear previous state
+            boardElements.forEach(family => {
+                const familyContainer = document.createElement('div');
+                familyContainer.classList.add('family-container');
+                // A family is represented by its top-level element
+                familyContainer.appendChild(renderElement(family)); 
+                gameBoard.appendChild(familyContainer);
+            });
+            updateMessage(`Board updated. ${boardElements.length} families on board.`);
+        }
+        
+        function updateMessage(message) {
+            messageArea.textContent = message;
+            console.log("Message:", message);
+        }
+
+        // --- GAME LOGIC (PLACEHOLDERS) ---
+
+        /**
+         * Finds the leftmost hungry alligator that can eat.
+         * For now, assumes the first element is a hungry alligator and the second is its food.
+         * @returns {{eater: object, food: object, eaterIndex: number, foodIndex: number} | null}
+         */
+        function findNextReducibleExpression() {
+            if (boardElements.length < 2) return null;
+
+            for (let i = 0; i < boardElements.length - 1; i++) {
+                const potentialEaterFamily = boardElements[i];
+                // Check if the top element of the family is a hungry alligator
+                if (potentialEaterFamily.type === 'alligator' && potentialEaterFamily.isHungry && !potentialEaterFamily.isOld) {
+                    const potentialFoodFamily = boardElements[i+1];
+                    return { 
+                        eaterFamily: potentialEaterFamily, 
+                        foodFamily: potentialFoodFamily, 
+                        eaterFamilyIndex: i, 
+                        foodFamilyIndex: i + 1 
+                    };
+                }
+            }
+            return null;
+        }
+        
+        /**
+         * Performs a "step" in the game (eating).
+         * Placeholder: removes eater and food, adds a placeholder result.
+         */
+        function stepGame() {
+            const reducible = findNextReducibleExpression();
+
+            if (!reducible) {
+                updateMessage("No reducible expression found (e.g., hungry alligator next to a family).");
+                return;
+            }
+
+            const { eaterFamily, foodFamily, eaterFamilyIndex, foodFamilyIndex } = reducible;
+
+            updateMessage(`Alligator ${eaterFamily.color} (ID: ${eaterFamily.id}) is eating family (top ID: ${foodFamily.id}). Implementing substitution...`);
+            
+            // --- BETA REDUCTION (Conceptual - very simplified) ---
+            // 1. Deep copy the eater's children (the function body).
+            // 2. Deep copy the food family (the argument).
+            // 3. Substitute: In the copied body, replace all eggs of the eater's color with the copied food family.
+            // 4. Hatching: If the eater was guarding eggs of its own color, they hatch into the food family.
+            // This is the most complex part and is NOT fully implemented here.
+
+            // Placeholder for actual substitution:
+            // Create a "result" family. For now, it's just an old gray alligator.
+            const substitutionResult = applyBetaReduction(eaterFamily, foodFamily);
+
+            // Remove the eater and the food from the board
+            boardElements.splice(eaterFamilyIndex, 2); // Removes 2 elements starting at eaterFamilyIndex
+
+            // Add the result of the substitution (if any)
+            if (substitutionResult) {
+                 boardElements.splice(eaterFamilyIndex, 0, substitutionResult); // Insert result at eater's original position
+            }
+            
+            renderBoard();
+            updateMessage(`Step complete. ${eaterFamily.color} alligator ate. Board updated.`);
+        }
+
+        /**
+         * Applies beta-reduction. (λv. Body) Arg  =>  Body[v := Arg]
+         * @param {object} eaterFunction - The alligator family representing the function (λv. Body).
+         * @param {object} argument - The family being eaten (Arg).
+         * @returns {object | null} The resulting family, or null if reduction is complex/error.
+         */
+        function applyBetaReduction(eaterFunction, argument) {
+            // eaterFunction is the hungry alligator itself. Its 'children' is the Body.
+            // eaterFunction.color is 'v'.
+            // argument is the family that was eaten.
+
+            if (eaterFunction.type !== 'alligator' || !eaterFunction.isHungry) {
+                console.error("Invalid eaterFunction for beta reduction");
+                return null;
+            }
+
+            const bodyToSubstituteIn = deepCopyElement(eaterFunction.children.length > 0 ? eaterFunction.children[0] : null); // Assuming body is the first child for simplicity
+                                                                                                                            // Or handle multiple children if an alligator guards a sequence.
+                                                                                                                            // For (λx. M N), M N is the body.
+                                                                                                                            // For now, let's assume an alligator guards a single element or a sequence that forms the body.
+                                                                                                                            // The paper shows an alligator guarding multiple things.
+                                                                                                                            // Let's assume eaterFunction.children is an array representing the body.
+
+            // If an alligator guards nothing (e.g. λx. []), its body is empty.
+            // If an alligator guards one thing (e.g. λx. E), its body is [E].
+            // If an alligator guards multiple things (e.g. λx. E1 E2), its body is [E1, E2].
+            // The result of the reduction should be this sequence.
+            // For now, this function will return a single resulting *family element*.
+            // If the body was [E1, E2], and substitution results in [E1', E2'],
+            // this function needs to decide how to represent that.
+            // The game typically results in a single new family.
+            // Let's assume the body is a single element for now.
+
+            let newBodyElements = eaterFunction.children.map(child => deepCopyElement(child));
+            
+            // Perform substitution and hatching
+            // This function will modify newBodyElements IN PLACE.
+            substituteAndHatch(newBodyElements, eaterFunction.color, deepCopyElement(argument));
+            
+            // If the body after substitution is a single element, return it.
+            // If it's multiple, they should become adjacent families on the board.
+            // This simplification returns the first element of the new body, or a placeholder.
+            if (newBodyElements.length === 1) {
+                return newBodyElements[0];
+            } else if (newBodyElements.length > 1) {
+                // This case is more complex: (λx. E1 E2) Arg -> E1[x:=Arg] E2[x:=Arg]
+                // These should become separate families on the board.
+                // For now, let's just return the first one and log a message.
+                updateMessage("Complex reduction: body resulted in multiple elements. Showing first.");
+                console.warn("Reduction resulted in multiple elements. This needs to be handled by creating multiple families.", newBodyElements);
+                return newBodyElements[0]; // Simplified
+            } else { // Body was empty, or became empty
+                // (λx. ) Arg -> empty. What does this mean? Perhaps an old alligator guarding nothing.
+                return createElement('alligator', 'gray', false, true, []); // Placeholder for empty result
+            }
+        }
+
+        /**
+         * Recursively substitutes variables and handles hatching.
+         * Modifies the 'elements' array in place.
+         * @param {Array<object>} elements - An array of element objects (the body being transformed).
+         * @param {string} variableColor - The color of the variable to be replaced (e.g., eater's color).
+         * @param {object} argumentToSubstitute - The deep-copied argument family to substitute in.
+         */
+        function substituteAndHatch(elements, variableColor, argumentToSubstitute) {
+            for (let i = 0; i < elements.length; i++) {
+                let currentElement = elements[i];
+
+                if (currentElement.type === 'egg' && currentElement.color === variableColor) {
+                    // This egg matches the variable, replace it with the argument
+                    elements[i] = deepCopyElement(argumentToSubstitute); 
+                } else if (currentElement.type === 'alligator') {
+                    // If this alligator binds the same variableColor, substitution stops for its children (shadowing).
+                    if (currentElement.color === variableColor && !currentElement.isOld) {
+                        // This alligator re-binds the variable. Do not substitute in its children.
+                        continue; 
+                    }
+                    // Otherwise, recurse into its children
+                    if (currentElement.children && currentElement.children.length > 0) {
+                        substituteAndHatch(currentElement.children, variableColor, argumentToSubstitute);
+                    }
+                }
+            }
+            // Hatching (simplified): After substitution, check for eggs of the *original eater's color*
+            // This part of the original rules is tricky: "if SHE was guarding any eggs of THE SAME COLOR,
+            // each of those eggs hatches into what SHE ATE."
+            // This implies that hatching happens based on the original structure of the eater's body,
+            // for eggs that were *directly* guarded by the eater and matched its color.
+            // The current `substituteAndHatch` might have already replaced these if they weren't shadowed.
+            // A more accurate hatching would need to identify these specific eggs *before* substitution,
+            // or handle it as a distinct pass.
+            // For now, this simplification focuses on substitution. The "hatching" described in the paper
+            // (eggs of the *eater's* color hatching into the *argument*) is what the substitution above achieves
+            // when an egg of `variableColor` is replaced by `argumentToSubstitute`.
+        }
+
+
+        /**
+         * Deep copies an element object.
+         * @param {object} element - The element to copy.
+         * @returns {object} A deep copy of the element.
+         */
+        function deepCopyElement(element) {
+            if (!element) return null;
+            const newElement = { ...element }; // Shallow copy properties
+            newElement.id = `el-${++elementIdCounter}`; // New ID for the copy
+            if (element.children) {
+                newElement.children = element.children.map(child => deepCopyElement(child));
+            }
+            return newElement;
+        }
+
+
+        function resetBoard() {
+            boardElements.length = 0; // Clear the array
+            elementIdCounter = 0; // Reset ID counter
+            renderBoard();
+            updateMessage("Board reset.");
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('step-button').addEventListener('click', stepGame);
+        document.getElementById('reset-button').addEventListener('click', resetBoard);
+
+        document.getElementById('add-gator-red').addEventListener('click', () => {
+            boardElements.push(createElement('alligator', 'red', true, false, []));
+            renderBoard();
+        });
+        document.getElementById('add-gator-green').addEventListener('click', () => {
+            boardElements.push(createElement('alligator', 'green', true, false, []));
+            renderBoard();
+        });
+        document.getElementById('add-egg-red').addEventListener('click', () => {
+            boardElements.push(createElement('egg', 'red'));
+            renderBoard();
+        });
+         document.getElementById('add-egg-green').addEventListener('click', () => {
+            boardElements.push(createElement('egg', 'green'));
+            renderBoard();
+        });
+
+        document.getElementById('add-example-1').addEventListener('click', () => {
+            // (λg. g) (λr. r)
+            // Family 1: Green alligator guarding a green egg
+            const greenEgg = createElement('egg', 'green');
+            const lambdaG = createElement('alligator', 'green', true, false, [greenEgg]);
+            
+            // Family 2: Red alligator guarding a red egg
+            const redEgg = createElement('egg', 'red');
+            const lambdaR = createElement('alligator', 'red', true, false, [redEgg]);
+
+            boardElements.push(lambdaG);
+            boardElements.push(lambdaR);
+            renderBoard();
+            updateMessage("Added example: (λg. g) (λr. r)");
+        });
+
+
+        // Initial render
+        renderBoard();
+        updateMessage("Game initialized. Add elements or an example.");
+
+    </script>
+</body>
+</html>

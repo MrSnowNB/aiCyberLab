@@ -1,0 +1,355 @@
+/* style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f4f8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1 { text-align: center; color: #2c3e50; margin-top: 25px; margin-bottom: 25px; font-size: 2.8em; font-weight: 600; width: 100%; }
+h2 { text-align: center; color: #34495e; margin-bottom: 20px; font-size: 1.8em; font-weight: 500; }
+h3 { text-align: center; color: #e67e22; font-size: 1.3em; margin-bottom: 15px; margin-top: 20px; font-weight: 500; }
+
+#app-container { width: 100%; max-width: 1700px; padding: 20px; box-sizing: border-box; }
+
+#game-setup-view,
+#session-summary-view {
+    width: 100%; background-color: #ffffff; padding: 25px; border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 20px;
+}
+
+/* --- ACTIVE GAME VIEW RESTRUCTURE --- */
+#active-game-view {
+    width: 100%;
+    display: flex; /* Changed to flex to manage its direct children */
+    flex-direction: column; /* Stack top content and periodic table section */
+    gap: 25px; /* Space between top content and periodic table section */
+}
+
+#active-game-top-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    align-items: flex-start;
+    width: 100%; /* Take full width to distribute columns */
+}
+
+.game-view-column {
+    padding: 20px; box-sizing: border-box; background-color: #ffffff;
+    border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    display: flex; flex-direction: column; gap: 20px;
+}
+
+#game-view-left-column { flex: 1 1 300px; min-width: 280px; } /* Adjusted basis slightly */
+#game-view-center-column { flex: 2 1 450px; min-width: 320px; }
+#game-view-right-column { flex: 1 1 300px; min-width: 280px; }
+
+
+/* Game Selection Styling (within #game-setup-view) */
+#game-selection-container { background-color: #fdfaf6; border: 1px solid #f3eade; padding: 25px; border-radius: 8px; text-align: center; }
+#game-selection-container h2 { color: #d35400; margin-top: 0; margin-bottom: 30px; }
+#zone-selection-area, #mode-selection-area { margin-bottom: 30px; }
+#zone-buttons-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
+.zone-select-btn { background-color: #5dade2; color: #ffffff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 500; transition: background-color 0.25s, box-shadow 0.25s; }
+.zone-select-btn:hover { background-color: #3498db; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.zone-select-btn.active-zone { background-color: #2980b9; color: white; box-shadow: 0 0 10px rgba(41, 128, 185, 0.5); }
+#zone-highlight-toggle-container { margin-top: 20px; margin-bottom: 10px; font-size: 0.95em; color: #555; }
+#zone-highlight-toggle-container label { margin-right: 8px; } #zone-highlight-toggle { vertical-align: middle; }
+.game-mode-select-btn { background-color: #f39c12; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 500; transition: background-color 0.25s, box-shadow 0.25s; margin: 8px; }
+.game-mode-select-btn:hover { background-color: #e67e22; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.game-mode-select-btn.active-mode { background-color: #27ae60; box-shadow: 0 0 12px rgba(39, 174, 96, 0.6); }
+#zone-info { margin-top: 15px; font-style: italic; color: #7f8c8d; } #current-zone-name { font-weight: bold; }
+.start-challenge-style-btn { background-color: #2ecc71; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 500; transition: background-color 0.2s, box-shadow 0.2s; display: inline-block; margin: 5px auto; }
+.start-challenge-style-btn:hover:not(:disabled) { background-color: #27ae60; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.start-challenge-style-btn.next-element-btn { background-color: #3498db; }
+.start-challenge-style-btn.next-element-btn:hover:not(:disabled) { background-color: #2980b9; }
+.start-challenge-style-btn:disabled { background-color: #bdc3c7; color: #7f8c8d; cursor: not-allowed; box-shadow: none;}
+
+
+/* Game Controls Styling (now only contains status and next button) */
+#game-controls-container { background-color: #eaf2f8; border: 1px solid #d4e6f1; padding: 20px; border-radius: 8px; text-align: center; }
+#game-controls-container h2 { margin-top: 0; color: #2980b9; font-size: 1.4em; }
+#game-status { margin-bottom: 18px; font-size: 1.05em; font-weight: 500; }
+#game-status p { margin: 5px 0; color: #34495e; } #score-value { color: #27ae60; font-weight: bold; } #attempts-value { color: #c0392b; font-weight: bold; }
+#start-challenge-btn { display: block; margin: 10px auto 0 auto; } /* Already styled by .start-challenge-style-btn */
+#game-instructions { font-style: italic; color: #7f8c8d; margin-top: 15px; font-size: 0.95em; }
+
+/* Common styling for containers in columns */
+#element-info-container, #atom-diagram-container, .game-ui-area, #hint-explanation-area {
+    border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; background-color: #fff;
+}
+#element-info-container h2, #atom-diagram-container h2 { color: #34495e; font-size: 1.3em; margin-top:0; margin-bottom: 15px; text-align: left; }
+
+/* --- PERIODIC TABLE SECTION (Full Width) --- */
+#periodic-table-section {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    margin-top: 25px; /* Ensure space if top content wraps and becomes tall */
+    box-sizing: border-box;
+}
+
+#periodic-table-legend-container {
+    border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px;
+    background-color: #fdfdfd; margin-bottom: 20px;
+}
+#periodic-table-legend-container h3 { color: #34495e; font-size: 1.3em; margin-top:0; margin-bottom: 15px; text-align: center; }
+#legend-content { display: flex; flex-wrap: wrap; gap: 10px 15px; justify-content: center; } /* Centered legend items */
+.legend-item { display: flex; align-items: center; font-size: 0.9em; }
+.legend-color-box { width: 20px; height: 20px; margin-right: 8px; border: 1px solid #ccc; border-radius: 4px;}
+.legend-text { color: #555; }
+
+/* Periodic Table - ENLARGED */
+#periodic-table-container {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(45px, 1fr)); /* Increased min size */
+    grid-auto-rows: minmax(45px, auto); /* Increased min size */
+    gap: 4px; /* Slightly larger gap */
+    padding: 10px;
+    background-color: #f8f9fa; /* Light bg for table area */
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+}
+.periodic-table-disabled .element-square { cursor: not-allowed; opacity: 0.6; }
+#periodic-table-container.element-sleuth-active.periodic-table-disabled .element-square:not(.eliminated-element) { cursor: help; opacity: 1; }
+#periodic-table-container.element-sleuth-active.periodic-table-disabled .element-square.highlight-zone-element:not(.eliminated-element) { opacity: 1; }
+#periodic-table-container.element-sleuth-active.periodic-table-disabled .element-square.dim-non-zone-element:not(.eliminated-element) { opacity: 0.4; }
+
+/* Element squares styling - ENLARGED */
+.element-square {
+    border: 1px solid #ced4da; padding: 4px; text-align: center; box-sizing: border-box; cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s, background-color 0.2s, opacity 0.2s;
+    display: flex; flex-direction: column; justify-content: space-around; align-items: center;
+    font-size: 0.8em; /* Increased base font size */
+    border-radius: 4px; color: #212529; overflow: hidden; position: relative; background-color: #fefefe;
+}
+.element-square:hover:not(.eliminated-element) { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-color: #495057; z-index: 10; }
+.element-square .atomic-number { font-size: 0.75em; /* Relative to new parent font-size */ width: 100%; text-align: left; padding-left: 4px; padding-top: 2px; color: #6c757d; }
+.element-square .symbol { font-size: 1.5em; /* Relative to new parent font-size */ font-weight: bold; display: block; line-height: 1; }
+.element-square.selected-element { border-color: #c0392b !important; background-color: #fdecea !important; transform: scale(1.12); box-shadow: 0 0 10px rgba(192, 57, 43, 0.5); color: #000 !important; z-index: 20; }
+
+/* Element Categories Styling */
+.alkali-metal { background-color: #ff7675; } .alkaline-earth-metal { background-color: #fab1a0; } .transition-metal { background-color: #ffeaa7; }
+.post-transition-metal { background-color: #dfe6e9; } .metalloid { background-color: #55efc4; } .nonmetal { background-color: #74b9ff; }
+.halogen { background-color: #a29bfe; } .noble-gas { background-color: #fd79a8; color: #fff;} .unknown { background-color: #b2bec3; }
+
+
+/* Element Info */
+#element-info-container { background-color: #e6fef2; border-color: #abebc6; }
+#element-info-container.game-mode-hidden #element-details { text-align: center; font-style: italic; color: #1e8449; padding: 25px 0; }
+#element-details h3 { margin-top: 0; color: #16a085; margin-bottom: 12px; text-align: left; font-size: 1.1em; }
+#element-details p { margin: 7px 0; font-size: 0.95em; line-height: 1.6; text-align: left;}
+#element-details strong { color: #2c3e50; margin-right: 6px;}
+.subatomic-counts { margin-top: 18px; padding-top: 18px; border-top: 1px dashed #a2d9ce;}
+.subatomic-counts h4 { margin-top: 0; margin-bottom: 10px; color: #16a085; font-size: 1em; text-align: left;}
+.subatomic-counts.hidden-counts p { color: #73c6b6; font-style: italic; text-align: center; padding: 15px 0;}
+
+/* Atom Diagram */
+#atom-diagram-container { background-color: #fef9e7; border-color: #fdebd0; text-align: center; }
+#atom-diagram-placeholder { color: #b08d57; margin-top: 30px; display: block; font-style: italic;}
+#d3-atom-model-container { width: 100%; max-width: 350px; height: auto; aspect-ratio: 1 / 1; margin: 15px auto; display: none; border: 1px solid #fad7a0; position: relative; background-color: #fffcf2; border-radius: 6px; overflow: hidden; }
+#d3-atom-model-container svg { width: 100%; height: 100%; display: block; }
+
+/* SVG specific styles */
+.nucleus-boundary-svg { fill: #fab1a0; stroke: #e17055; stroke-width: 2; opacity: 0.6; }
+.electron-shell-svg { fill: none; stroke: #74b9ff; stroke-width: 1.5; stroke-dasharray: 4 2; }
+g.proton-group circle { fill: #0984e3; stroke: #005cb2; stroke-width: 1; }
+g.neutron-group circle { fill: #6c5ce7; stroke: #4834d4; stroke-width: 1; }
+g.electron-group circle { fill: #00b894; stroke: #008265; stroke-width: 1; }
+.particle-charge-text { font-family: Arial, sans-serif; font-size: 9px; text-anchor: middle; dominant-baseline: central; fill: white; font-weight: bold; pointer-events: none; }
+g.neutron-group .particle-charge-text { display: none; }
+
+/* Hint/Explanation Area Styling */
+#hint-explanation-area { background-color: #e8f6fd; border: 1px solid #aed6f1; padding: 18px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+#hint-explanation-area h4 { margin-top: 0; color: #2471a3; text-align: left; margin-bottom: 12px; font-size: 1.1em; }
+#hint-explanation-text { font-size: 1em; line-height: 1.7; color: #2e86c1; text-align: left; }
+#hint-explanation-text strong { color: #1b4f72; }
+
+/* Game UI Areas common styling */
+.game-ui-area { background-color: #f4f6f7; padding: 20px; border-radius: 8px; border: 1px solid #e5e8e8; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.game-ui-area h3 { margin-top: 0; color: #566573; text-align: center; font-size: 1.2em; margin-bottom: 18px; }
+
+/* Particle Pinpoint UI */
+#particle-pinpoint-ui div { margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+#particle-pinpoint-ui label { width: 100px; text-align: right; font-size: 1em; color: #5d6d7e; }
+#particle-pinpoint-ui input[type="number"] { width: 80px; padding: 10px; border: 1px solid #cacfd2; border-radius: 5px; font-size: 1em; text-align: center; }
+
+/* Property Profiler UI */
+#property-profiler-ui h3 { margin-bottom: 20px; } /* property-question-text */
+#mcq-options-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.mcq-option-btn { background-color: #5dade2; color: white; padding: 12px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; width: 100%; max-width: 400px; transition: background-color 0.2s, transform 0.1s; box-sizing: border-box; text-align: center; }
+.mcq-option-btn:hover:not(:disabled) { background-color: #3498db; transform: translateY(-1px); }
+.mcq-option-btn.selected-answer { background-color: #f1c40f; color: #333; }
+.mcq-option-btn.correct-answer { background-color: #2ecc71 !important; color: white !important; }
+.mcq-option-btn.incorrect-answer { background-color: #e74c3c !important; color: white !important; opacity: 0.8; }
+.mcq-option-btn:disabled { cursor: not-allowed; background-color: #d5dbdb; color: #839192; }
+
+/* Element Sleuth UI */
+#element-sleuth-ui { background-color: #fefcf5; border-color: #f7f3e3; }
+#element-sleuth-ui h3 { color: #8c7853; }
+#element-sleuth-instructions { font-size: 1em; margin-bottom: 18px; color: #706040; text-align: center; }
+#clue-display-area { background-color: #fff; padding: 18px; border-radius: 6px; border: 1px dashed #e0dacc; margin-bottom: 18px; min-height: 90px; text-align: left; }
+#clue-display-area h4 { margin-top: 0; margin-bottom: 10px; color: #706040; font-size: 1.05em; text-align:left; }
+#clue-list { list-style-type: decimal; padding-left: 25px; margin: 0; }
+#clue-list li { font-size: 1em; color: #504030; margin-bottom: 8px; opacity: 0; transform: translateX(-15px); animation: fadeInClue 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+#clue-list li:last-child { margin-bottom: 0; }
+@keyframes fadeInClue { to { opacity: 1; transform: translateX(0); } }
+#reveal-next-clue-btn { background-color: #a0d281; color: #333; padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; margin: 10px auto 15px auto; display: block; transition: background-color 0.2s; }
+#reveal-next-clue-btn:hover:not(:disabled) { background-color: #8fbc70; }
+#reveal-next-clue-btn:disabled { background-color: #e8f5e9; color: #a5d6a7; cursor: not-allowed; }
+#sleuth-guesses-remaining { font-weight: bold; color: #d35400; display: block; text-align: center; margin-top: 10px;}
+
+/* Game Action Area (Check Answer button & Feedback) */
+#game-action-container { text-align: center; }
+#check-answer-btn { display: block; min-width: 200px; margin: 0 auto 15px auto; padding: 12px 25px; background-color: #e67e22; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 500; transition: background-color 0.2s, box-shadow 0.2s; }
+#check-answer-btn:hover:not(:disabled) { background-color: #d35400; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+#check-answer-btn:disabled { background-color: #bdc3c7; color: #7f8c8d; cursor: not-allowed; box-shadow: none;}
+
+/* Session Summary Styling */
+#session-summary-container { background-color: #e9eaf6; border: 1px solid #c5cae9; padding: 30px; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; max-width: 600px; }
+#session-summary-container h2 { color: #3f51b5; margin-top: 0; margin-bottom: 25px; font-size: 2em; }
+#session-summary-container p { font-size: 1.25em; color: #5c6bc0; margin: 12px 0; }
+#session-summary-container p span { font-weight: bold; color: #303f9f; }
+#summary-actions { margin-top: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+#summary-actions button { background-color: #7986cb; color: white; padding: 12px 22px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.05em; font-weight: 500; transition: background-color 0.2s; min-width: 180px; }
+#summary-actions button:hover { background-color: #5c6bc0; }
+
+/* Feedback Message Styling */
+#feedback-message { text-align: center; font-weight: 500; padding: 15px; border-radius: 6px; display: none; font-size: 1em; margin: 0 auto; box-sizing: border-box; border-width: 1px; border-style: solid; }
+.feedback-success { color: #1e824c; background-color: #dff0d8; border-color: #d0e9c6;}
+.feedback-error { color: #a94442; background-color: #f2dede; border-color: #ebcccc;}
+.feedback-warning { color: #8a6d3b; background-color: #fcf8e3; border-color: #faf2cc;}
+input.input-error { border-color: #c0392b !important; background-color: #fdecea !important; box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.3); }
+input.input-correct { border-color: #27ae60 !important; background-color: #eafaf1 !important; box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.3); }
+
+/* Periodic Table Element Highlighting & Sleuth Interaction */
+.element-square.highlight-zone-element { border: 2px solid #007bff; box-shadow: 0 0 10px rgba(0, 100, 255, 0.6); background-color: #e6f7ff; }
+.element-square.dim-non-zone-element { opacity: 0.45; }
+#periodic-table-container.element-sleuth-active .element-square:not(.eliminated-element) { /* cursor already set */ }
+.element-square.eliminated-element { opacity: 0.20 !important; pointer-events: none; transform: scale(0.9) !important; border-color: #e0e0e0 !important; background-color: #f0f0f0 !important; }
+.element-square.eliminated-element.highlight-zone-element, .element-square.eliminated-element.dim-non-zone-element { opacity: 0.20 !important; }
+
+
+/* --- Responsiveness --- */
+@media (max-width: 1200px) {
+    #active-game-top-content { /* Allow columns to wrap sooner if needed */
+        /* flex-direction: column; */ /* Uncomment if you want columns to stack this early */
+    }
+    #periodic-table-container {
+        grid-template-columns: repeat(18, minmax(40px, 1fr));
+        grid-auto-rows: minmax(40px, auto);
+    }
+    .element-square { font-size: 0.7em; }
+}
+
+@media (max-width: 992px) { /* Tablet - Stack top columns, periodic table remains full width below */
+    #active-game-top-content {
+        flex-direction: column; /* Stack the three main content columns */
+    }
+    .game-view-column { /* Columns take full width when stacked */
+        flex-basis: auto; width: 100%; min-width: 0;
+    }
+    #periodic-table-container {
+        grid-template-columns: repeat(18, minmax(35px, 1fr)); /* Adjust for slightly less width */
+        grid-auto-rows: minmax(35px, auto); gap: 3px;
+    }
+    .element-square { font-size: 0.65em; padding: 3px; }
+    .element-square .symbol { font-size: 1.4em; }
+}
+
+@media (max-width: 768px) { /* Smaller tablets / large phones */
+    h1 { font-size: 2.2em; } h2 { font-size: 1.6em; } h3 { font-size: 1.2em; }
+    .game-mode-select-btn { font-size: 1em; padding: 10px 20px; }
+    .zone-select-btn { font-size: 0.9em; padding: 9px 16px; }
+
+    #periodic-table-container {
+        grid-template-columns: repeat(18, minmax(30px, 1fr)); /* Further reduce for mobile */
+        grid-auto-rows: minmax(30px, auto); gap: 2px;
+    }
+    .element-square { font-size: 0.6em; padding: 2px; }
+    .element-square .symbol { font-size: 1.3em; }
+    .element-square .atomic-number { font-size: 0.7em; }
+    #mcq-options-container { width: 100%; }
+    .mcq-option-btn { font-size: 0.95em; padding: 10px 15px; }
+}
+
+@media (max-width: 600px) { /* Even smaller mobile screens */
+     #periodic-table-container {
+        grid-template-columns: repeat(12, minmax(30px, 1fr)); /* Reduce columns for visibility */
+        grid-auto-rows: minmax(30px, auto);
+    }
+    .element-square .symbol { font-size: 1.2em; }
+}
+
+
+@media (max-width: 480px) {
+    #app-container { padding: 10px; }
+    .game-view-column, #game-setup-view, #session-summary-view, #periodic-table-section { padding: 15px; }
+    h1 { font-size: 1.8em; margin-bottom: 20px; }
+    #game-status { font-size: 0.9em; }
+    .start-challenge-style-btn { font-size: 1em; padding: 10px 18px; }
+    #zone-buttons-container { gap: 8px; }
+    .zone-select-btn { font-size: 0.8em; padding: 7px 10px; }
+    .game-mode-select-btn { font-size: 0.9em; padding: 9px 14px; margin: 5px; }
+
+    #periodic-table-container {
+        grid-template-columns: repeat(9, minmax(28px, 1fr)); /* 9 columns for very narrow screens */
+        grid-auto-rows: minmax(28px, auto); gap: 1px;
+    }
+    .element-square { font-size: 0.55em; padding: 1px;}
+    .element-square .symbol { font-size: 1.1em; }
+    .element-square .atomic-number { font-size: 0.65em; padding-left: 1px; }
+
+    #summary-actions { flex-direction: column; gap: 10px; }
+    #summary-actions button { width: 100%; min-width: unset; font-size: 0.95em; }
+}
+.secondary-action-btn {
+    background-color: #7f8c8d; /* Grey */
+    color: white;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s;
+    display: block; /* To take full width of its parent if desired, or inline-block */
+    margin-left: auto;
+    margin-right: auto;
+}
+.secondary-action-btn:hover {
+    background-color: #5d6d7e; /* Darker grey */
+}
+
+#element-sleuth-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Space between button and toggle */
+    margin-bottom: 10px;
+}
+
+#element-sleuth-controls label {
+    font-size: 0.9em;
+    color: #555;
+}
+#element-sleuth-controls input[type="checkbox"] {
+    vertical-align: middle;
+    width: 16px; /* Custom size */
+    height: 16px;
+}
+
+
+/* Adjust Reveal Next Clue button margin if it's now in a flex container */
+#reveal-next-clue-btn {
+    /* margin: 10px auto 15px auto; /* Remove this if it's flexed */
+    /* display: block; /* Remove this if it's flexed */
+    margin-right: 0; /* Reset if it had specific margin */
+}

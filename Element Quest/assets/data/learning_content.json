@@ -1,0 +1,22 @@
+{
+    "properties": {
+        "category": {
+            "displayName": "Element Category",
+            "definition": "Elements are grouped into categories based on their shared chemical and physical properties. Common categories include metals, nonmetals, and metalloids, with more specific groups like alkali metals, halogens, or noble gases.",
+            "hint": "Think about the element's general behavior. Is it shiny and conductive (metal)? Dull and an insulator (nonmetal)? Or somewhere in between (metalloid)? Its position on the periodic table also gives strong clues!"
+        },
+        "group": {
+            "displayName": "Group (Column)",
+            "definition": "A group is a vertical column in the periodic table. Elements in the same group typically have similar valence electron configurations and thus similar chemical properties. Groups are numbered 1 through 18.",
+            "hint": "Look at the vertical column the element is in. Elements in the same column often react similarly. For example, Group 1 elements are all very reactive alkali metals."
+        },
+        "period": {
+            "displayName": "Period (Row)",
+            "definition": "A period is a horizontal row in the periodic table. Elements in the same period have the same number of electron shells. Properties change predictably across a period.",
+            "hint": "Count the horizontal rows from the top. The row number tells you how many electron shells the element's atoms have."
+        }
+    },
+    "general": {
+        "tryAgainHint": "Review the definition and hint provided. Consider the element's position on the periodic table for clues about its properties."
+    }
+}

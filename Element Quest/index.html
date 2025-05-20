@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Element Quest - Atom Chaser</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>Element Quest - Atom Chaser</h1>
+
+    <div id="app-container">
+
+        <div id="game-setup-view">
+            <!-- ... (game-selection-container remains the same) ... -->
+             <div id="game-selection-container">
+                <h2>Choose Your Settings!</h2>
+                <div id="zone-selection-area">
+                    <h3>1. Select Your Zone:</h3>
+                    <div id="zone-buttons-container">
+                        <!-- Zone buttons will be dynamically generated here -->
+                    </div>
+                    <div id="zone-highlight-toggle-container">
+                        <label for="zone-highlight-toggle">Show Zone Elements on Table (in game):</label>
+                        <input type="checkbox" id="zone-highlight-toggle" checked>
+                    </div>
+                    <p id="zone-info">Current Zone: <span id="current-zone-name">All Elements (1-54)</span></p>
+                </div>
+                <div id="mode-selection-area">
+                    <h3>2. Select Your Challenge Mode:</h3>
+                    <button id="select-particle-pinpoint-btn" class="game-mode-select-btn" data-mode="particle-pinpoint">Particle Pinpoint</button>
+                    <button id="select-property-profiler-btn" class="game-mode-select-btn" data-mode="property-profiler">Property Profiler</button>
+                    <button id="select-element-sleuth-btn" class="game-mode-select-btn" data-mode="element-sleuth">Element Sleuth</button>
+                </div>
+                <div id="proceed-to-game-container" style="text-align: center; margin-top: 30px;">
+                    <p id="setup-instructions" style="font-style: italic; color: #546e7a; margin-bottom: 10px; min-height: 1.2em;">
+                        Select a zone and mode to proceed.
+                    </p>
+                    <button id="proceed-to-challenge-btn" class="start-challenge-style-btn" disabled>Proceed to Challenge</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="active-game-view" style="display:none;">
+            <div id="active-game-top-content">
+                <div class="game-view-column" id="game-view-left-column">
+                    <div id="game-controls-container">
+                        <h2 id="current-challenge-title">Challenge Title</h2>
+                        <div id="game-status">
+                            <p>Score: <span id="score-value">0</span></p>
+                            <p>Attempts: <span id="attempts-value">0</span>/<span id="max-attempts-value">3</span></p>
+                        </div>
+                        <button id="start-challenge-btn" class="start-challenge-style-btn">Start Challenge</button>
+                        <p id="game-instructions">Instructions will appear here.</p>
+                        <button id="back-to-settings-btn" class="secondary-action-btn" style="margin-top: 15px;">Back to Settings</button> <!-- NEW BUTTON -->
+                    </div>
+                </div>
+
+                <div class="game-view-column" id="game-view-center-column">
+                    <!-- ... (element-info-container, particle-pinpoint-ui, property-profiler-ui remain the same) ... -->
+                     <div id="element-info-container">
+                        <h2 id="element-info-title">Element Information</h2>
+                        <div id="element-details">
+                            <p>Details will appear here.</p>
+                        </div>
+                    </div>
+                    <div id="particle-pinpoint-ui" class="game-ui-area" style="display:none;">
+                        <h3>Count the Particles:</h3>
+                        <div><label for="proton-input">Protons (P):</label><input type="number" id="proton-input" min="0" step="1"></div>
+                        <div><label for="neutron-input">Neutrons (N):</label><input type="number" id="neutron-input" min="0" step="1"></div>
+                        <div><label for="electron-input">Electrons (E):</label><input type="number" id="electron-input" min="0" step="1"></div>
+                    </div>
+                    <div id="property-profiler-ui" class="game-ui-area" style="display:none;">
+                        <h3 id="property-question-text">Property Question?</h3>
+                        <div id="mcq-options-container"></div>
+                    </div>
+                    <div id="element-sleuth-ui" class="game-ui-area" style="display:none;">
+                        <h3>Element Sleuth - Find the Mystery Element!</h3>
+                        <p id="element-sleuth-instructions">Clues will be revealed. Click on the table to guess.</p>
+                        <div id="clue-display-area">
+                            <h4>Revealed Clues (<span id="clue-count-current">0</span>/<span id="clue-count-total">5</span>):</h4>
+                            <ul id="clue-list"></ul>
+                        </div>
+                        <div id="element-sleuth-controls" style="margin-top:10px; text-align:center;"> <!-- NEW CONTAINER -->
+                            <button id="reveal-next-clue-btn" style="display:none; margin-right: 10px;">Reveal Next Clue</button>
+                            <label for="sleuth-clue-filter-toggle">Filter Table by Clues:</label> <!-- NEW TOGGLE -->
+                            <input type="checkbox" id="sleuth-clue-filter-toggle">
+                        </div>
+                        <p id="sleuth-guesses-remaining">Guesses remaining: <span id="sleuth-guesses-value">3</span></p>
+                    </div>
+                    <!-- ... (hint-explanation-area, game-action-container remain the same) ... -->
+                     <div id="hint-explanation-area" style="display:none;">
+                        <h4>Hint & Explanation</h4>
+                        <p id="hint-explanation-text"></p>
+                    </div>
+                    <div id="game-action-container" style="display:none;">
+                        <button id="check-answer-btn">Check My Answer</button>
+                        <div id="feedback-message"></div>
+                    </div>
+                </div>
+
+                <div class="game-view-column" id="game-view-right-column">
+                     <!-- ... (atom-diagram-container remains the same) ... -->
+                    <div id="atom-diagram-container">
+                        <h2 id="atom-diagram-title">Atom Diagram</h2>
+                        <div id="d3-atom-model-container"></div>
+                        <p id="atom-diagram-placeholder">The atom model will appear here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="periodic-table-section">
+                <!-- ... (periodic-table-legend-container, periodic-table-container remain the same) ... -->
+                <div id="periodic-table-legend-container">
+                    <h3>Element Categories Legend</h3>
+                    <div id="legend-content"></div>
+                </div>
+                <div id="periodic-table-container">
+                    <!-- Main Periodic table will be populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="session-summary-view" style="display:none;">
+             <!-- ... (session-summary-container remains the same) ... -->
+            <div id="session-summary-container">
+                <h2 id="session-summary-title">Challenge Complete!</h2>
+                <p>Total Score: <span id="summary-score">0</span></p>
+                <p>Accuracy: <span id="summary-accuracy">0%</span> (<span id="summary-correct">0</span>/<span id="summary-total-played">0</span>)</p>
+                <div id="summary-actions">
+                    <button id="summary-play-again-btn">Play Same Again</button>
+                    <button id="summary-new-settings-btn">Choose New Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

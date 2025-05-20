@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Zebra: Classroom Chaos (Debug v2)</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #000; display: flex; justify-content: center; align-items: center; }
+        canvas { display: block; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
+</head>
+<body>
+    <script>
+        // --- Game Configuration ---
+        let gravity = 0.3; let lift = -6; let zebraSize = 50; let pipeWidth = 80; let pipeGap = 250; let pipeSpeed = 3; let pipeSpawnRate = 100;
+
+        // --- Game Variables ---
+        let zebra; let pipes = []; let score = 0; let gameState = 'start'; let classroomBg; let zebraImg;
+
+        // --- Debug Flag ---
+        let firstPlayingFrame = true; // Flag to log extra details on the first frame of 'playing' state
+
+        function preload() {
+          console.log("Preload: Attempting to load images...");
+          try {
+            classroomBg = loadImage('classroom.jpg', () => console.log("Preload: Classroom background loaded."), (e) => console.error("Preload Error: Failed to load classroom.jpg:", e));
+            zebraImg = loadImage('zebra.png', () => console.log("Preload: Zebra image loaded."), (e) => console.error("Preload Error: Failed to load zebra.png:", e));
+          } catch (e) { console.error("Preload Error: Critical failure initiating image loading:", e); classroomBg = null; zebraImg = null; }
+          console.log("Preload: Finished.");
+        }
+
+        function setup() {
+          console.log("Setup: Starting...");
+          let canvas = createCanvas(windowWidth, windowHeight);
+          console.log(`Setup: Canvas created with windowWidth=${windowWidth}, windowHeight=${windowHeight}. Actual canvas dimensions: width=${width}, height=${height}`);
+          if (width <= 0 || height <= 0) { console.error("Setup Error: Invalid canvas dimensions!", {width, height}); }
+          imageMode(CENTER); textAlign(CENTER, CENTER);
+          resetGame(); // Initialize objects
+          gameState = 'start'; // Set initial state explicitly AFTER reset
+          console.log(`Setup: Complete. Initial state='${gameState}'. Zebra: ${zebra ? 'Exists' : 'null'}, Pipes: ${pipes.length}`);
+        }
+
+        function draw() {
+          // --- Background ---
+          if (classroomBg && classroomBg.width > 0) { image(classroomBg, width / 2, height / 2, width, height); }
+          else { background(150, 180, 200); }
+
+          // --- Game State Logic ---
+          if (gameState === 'playing') {
+            // --- Debugging for first frame ---
+            if (firstPlayingFrame) {
+                console.log(`Draw (Playing - First Frame): frameCount=${frameCount}`);
+                if (zebra) { console.log(`Draw (Playing - First Frame): Zebra initial state: x=${zebra.x.toFixed(2)}, y=${zebra.y.toFixed(2)}, velocity=${zebra.velocity.toFixed(2)}`); }
+                else { console.error("Draw (Playing - First Frame): ZEBRA IS NULL!"); }
+                if (pipes.length > 0) { console.log(`Draw (Playing - First Frame): Pipe[0] initial state: x=${pipes[0].x.toFixed(2)}, top=${pipes[0].top.toFixed(2)}, bottom=${pipes[0].bottom.toFixed(2)}`); }
+                else { console.warn("Draw (Playing - First Frame): No pipes exist yet."); }
+                firstPlayingFrame = false; // Only log this once per game start
+            }
+            // --- End Debugging ---
+
+            // --- Update and Draw Pipes ---
+            for (let i = pipes.length - 1; i >= 0; i--) {
+              pipes[i].update();
+              pipes[i].show();
+              if (zebra && pipes[i].hits(zebra)) { // Check if zebra exists
+                console.log(`Draw (Playing): Collision detected by pipes[${i}].hits! frameCount=${frameCount}`);
+                gameOver();
+              }
+              if (pipes[i].offscreen()) { pipes.splice(i, 1); }
+              if (!pipes[i].passed && zebra && pipes[i].isPast(zebra)) { pipes[i].passed = true; score++; } // Check zebra exists
+            }
+
+            // --- Update and Draw Zebra ---
+            if (zebra) { // Check if zebra exists before updating/showing
+                zebra.update();
+                zebra.show();
+            } else if (!firstPlayingFrame) { // Avoid logging this if it was already logged above
+                // Log error if zebra is missing during gameplay (shouldn't happen unless reset failed)
+                console.error(`Draw (Playing): Zebra is null! frameCount=${frameCount}`);
+            }
+
+
+            // --- Spawn New Pipes ---
+             if (frameCount > 0 && frameCount % pipeSpawnRate === 0) {
+                 if (pipes.length === 0 || pipes[pipes.length - 1].x < width - pipeWidth * 1.5) {
+                    pipes.push(new Pipe());
+                 }
+            }
+            // --- Display Score ---
+            displayScore();
+
+          } else if (gameState === 'gameOver') {
+            displayGameOver();
+          } else if (gameState === 'start') {
+            // Draw elements for visual context on start screen
+            for(let pipe of pipes) { pipe.show(); }
+            if (zebra) { zebra.show(); }
+            displayStartScreen();
+          }
+        }
+
+        // --- INPUT HANDLING ---
+
+        // Use keyPressed for continuous action DURING gameplay
+        function keyPressed() {
+            if (key === ' ' && gameState === 'playing') {
+                // console.log("keyPressed: Flap initiated during play."); // Can enable for detailed flap log
+                if(zebra) { zebra.flap(); }
+            }
+            // Prevent default browser action for spacebar (scrolling)
+            // return key === ' ' ? false : true;
+        }
+
+        // Use keyReleased ONCE for state changes (start/restart)
+        function keyReleased() {
+            if (key === ' ') {
+                if (gameState === 'gameOver' || gameState === 'start') {
+                    console.log(`keyReleased: Spacebar released. Current state='${gameState}'. Resetting and starting...`);
+                    firstPlayingFrame = true; // Reset debug flag for the next start
+                    resetGame();
+                    if (zebra) {
+                        console.log("keyReleased: Applying initial flap.");
+                        zebra.flap(); // Apply initial flap AFTER reset
+                        console.log(`keyReleased: Zebra state after initial flap: y=${zebra.y.toFixed(2)}, velocity=${zebra.velocity.toFixed(2)}`);
+                    } else {
+                        console.error("keyReleased Error: Zebra is null after resetGame! Cannot flap.");
+                    }
+                    gameState = 'playing';
+                    console.log(`keyReleased: Game state set to 'playing'. frameCount=${frameCount}`);
+                }
+            }
+             return false; // Prevent default browser behavior
+        }
+
+        // --- Helper Functions ---
+
+        function resetGame() {
+          console.log("resetGame: Called.");
+          score = 0;
+          pipes = [];
+          // Create zebra first, ensuring 'height' is valid
+          if (typeof height !== 'number' || height <= 0 || isNaN(height)) {
+              console.error(`resetGame Error: Invalid height (${height}) detected before creating Zebra! Using fallback height 300.`);
+              // Attempt to recover - this might not reflect actual canvas size
+              zebra = new Zebra(300); // Pass a fallback height
+          } else {
+              zebra = new Zebra(height); // Pass current height to constructor
+          }
+          console.log(`resetGame: Zebra created. Initial y=${zebra.y.toFixed(2)}`);
+
+          // Add the first pipe, ensuring 'width' is valid
+          let pipeX;
+           if (typeof width !== 'number' || width <= 0 || isNaN(width)) {
+                console.error(`resetGame Error: Invalid width (${width}) detected before creating Pipe! Using fallback x=500.`);
+                pipeX = 500;
+           } else {
+               pipeX = width + pipeWidth; // Start it just off the right edge
+           }
+          let firstPipe = new Pipe();
+          firstPipe.x = pipeX;
+          pipes.push(firstPipe);
+          console.log(`resetGame: First pipe created at x=${firstPipe.x.toFixed(2)}`);
+          console.log("resetGame: Finished.");
+        }
+
+        function gameOver() {
+          if (gameState === 'playing') { // Prevent multiple calls if already game over
+             console.error(`gameOver: Called! Transitioning from 'playing'. frameCount=${frameCount}`);
+             console.trace(); // Log stack trace to see *who* called gameOver
+             gameState = 'gameOver';
+          } else {
+             console.warn(`gameOver: Called but gameState is already '${gameState}'. Ignoring. frameCount=${frameCount}`);
+          }
+        }
+
+        function displayScore() { /* ... (no changes needed) ... */ fill(255); stroke(0); strokeWeight(3); textSize(40); text("Score: " + score, width / 2, 50); }
+        function displayGameOver() { /* ... (no changes needed) ... */ for(let pipe of pipes) { pipe.show(); } if (zebra) { zebra.show(); } fill(255, 50, 50, 200); rect(0, 0, width, height); fill(255); stroke(0); strokeWeight(4); textSize(64); text("Game Over!", width / 2, height / 2 - 50); textSize(32); text("Final Score: " + score, width / 2, height / 2 + 20); textSize(24); text("Press SPACE to Restart", width / 2, height / 2 + 70); }
+        function displayStartScreen() { /* ... (no changes needed) ... */ fill(0, 0, 0, 150); rect(0, 0, width, height); fill(255); stroke(0); strokeWeight(4); textSize(48); text("Flappy Zebra: Classroom Chaos", width / 2, height / 2 - 50); textSize(32); text("Press SPACE to Start", width / 2, height / 2 + 50); }
+
+        // --- Classes ---
+
+        class Zebra {
+          // Accept initial height in constructor for safety check
+          constructor(initialHeight) {
+            console.log(`Zebra constructor: Received initialHeight=${initialHeight}`);
+            // Use provided height, ensuring it's valid, otherwise fallback
+            let h = (typeof initialHeight === 'number' && initialHeight > 0) ? initialHeight : 300;
+            this.y = h / 2; // Use safe height
+            // Use width if available and valid, otherwise fallback
+            let w = (typeof width === 'number' && width > 0) ? width : 400;
+            this.x = w / 4;
+
+            this.gravity = gravity; this.lift = lift; this.velocity = 0; this.size = zebraSize; this.halfSize = this.size / 2;
+             console.log(`Zebra constructor: Initial state set: x=${this.x.toFixed(2)}, y=${this.y.toFixed(2)}, size=${this.size}`);
+          }
+
+          show() { /* ... (no changes needed, but check rotation mapping) ... */ push(); translate(this.x, this.y); let angle = map(this.velocity, -abs(this.lift)*1.2, abs(this.lift)*0.8, -PI / 5, PI / 8); rotate(angle); if (zebraImg && zebraImg.width > 0) { image(zebraImg, 0, 0, this.size, this.size); } else { fill(255); stroke(0); rectMode(CENTER); rect(0, 0, this.size, this.size * 0.8); } pop(); }
+
+          update() {
+            this.velocity += this.gravity;
+            this.y += this.velocity;
+            let currentHeight = (typeof height === 'number' && height > 0) ? height : 300; // Use safe height check
+
+            // Ground Check
+            let groundY = currentHeight - this.halfSize;
+            if (this.y > groundY) {
+              console.log(`Zebra.update: Ground collision check: y=${this.y.toFixed(2)} > groundY=${groundY.toFixed(2)} (height=${currentHeight}, halfSize=${this.halfSize}) -> TRUE`);
+              this.y = groundY;
+              this.velocity = 0;
+              gameOver();
+            }
+
+            // Ceiling Check
+            let ceilingY = this.halfSize;
+            if (this.y < ceilingY) {
+               // console.log(`Zebra.update: Ceiling collision check: y=${this.y.toFixed(2)} < ceilingY=${ceilingY.toFixed(2)} -> TRUE`); // Optional log
+              this.y = ceilingY;
+              this.velocity = 0;
+            }
+          }
+
+          flap() { this.velocity = this.lift; /*console.log(`Zebra.flap: Velocity set to ${this.velocity}`);*/ } // Optional log
+        }
+
+        class Pipe {
+          constructor() {
+            this.spacing = pipeGap;
+            let currentHeight = (typeof height === 'number' && height > 0) ? height : 300; // Use safe height
+            let minMargin = currentHeight * 0.1;
+            let usableHeight = max(0, currentHeight - 2 * minMargin - this.spacing);
+            this.top = minMargin + random(0, usableHeight);
+            this.bottom = this.top + this.spacing;
+            // Initial 'x' is set in resetGame, default here might be width
+            this.x = (typeof width === 'number' && width > 0) ? width : 400; // Default/fallback
+            this.w = pipeWidth; this.speed = pipeSpeed; this.highlight = false; this.passed = false;
+            // console.log(`Pipe constructor: Created pipe. top=${this.top.toFixed(2)}, bottom=${this.bottom.toFixed(2)}, x=${this.x.toFixed(2)}`); // Optional log
+          }
+
+          show() { /* ... (no changes needed) ... */ fill(0, 150, 0); stroke(0); strokeWeight(2); if (this.highlight) { fill(255, 0, 0); } rectMode(CORNER); rect(this.x, 0, this.w, this.top); rect(this.x, this.bottom, this.w, height - this.bottom); }
+          update() { this.x -= this.speed; }
+          offscreen() { return this.x < -this.w; }
+
+          hits(zebra) {
+            let zebraTop = zebra.y - zebra.halfSize; let zebraBottom = zebra.y + zebra.halfSize;
+            let zebraLeft = zebra.x - zebra.halfSize; let zebraRight = zebra.x + zebra.halfSize;
+            let pipeLeft = this.x; let pipeRight = this.x + this.w;
+
+            if (zebraRight > pipeLeft && zebraLeft < pipeRight) {
+                 if (zebraTop < this.top || zebraBottom > this.bottom) {
+                     console.warn(`Pipe.hits: Collision DETECTED! Zebra(T/B/L/R): ${zebraTop.toFixed(1)}/${zebraBottom.toFixed(1)}/${zebraLeft.toFixed(1)}/${zebraRight.toFixed(1)}. Pipe(L/R/T/B): ${pipeLeft.toFixed(1)}/${pipeRight.toFixed(1)}/${this.top.toFixed(1)}/${this.bottom.toFixed(1)}`);
+                     this.highlight = true; return true;
+                 }
+             }
+            this.highlight = false; return false;
+          }
+           isPast(zebra) { return zebra.x > this.x + this.w; }
+        }
+
+        function windowResized() {
+           console.log("windowResized: Adjusting canvas...");
+          resizeCanvas(windowWidth, windowHeight);
+           console.log(`windowResized: New dimensions: width=${width}, height=${height}`);
+           // Optional: Reset game on resize?
+           // firstPlayingFrame = true; resetGame(); gameState = 'start';
+        }
+
+    </script>
+</body>
+</html>

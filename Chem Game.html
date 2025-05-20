@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balancing Chemical Equations Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            /* Subtle hexagonal background pattern */
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='46' viewBox='0 0 40 46' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 23l20-11.5V0L20 11.5 0 0v11.5L20 23zM0 23l20 11.5L0 46V23zm40 0v23L20 34.5 40 23z' fill='%23dce4f0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-color: #eef1f5; /* Fallback and to blend with pattern */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        #game-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); /* Slightly more pronounced shadow */
+            width: 100%;
+            max-width: 980px; /* Increased max-width slightly */
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px; /* Increased margin */
+            font-weight: 700;
+            font-size: 2.2em; /* Slightly larger */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 svg { /* Style for the flask icon */
+            vertical-align: middle; /* Adjusted for flex alignment */
+            margin-right: 12px;
+        }
+        #level-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            padding-top: 20px; /* Add some padding */
+            border-top: 1px solid #e9ecef; /* Separator line */
+            flex-wrap: wrap;
+        }
+        #level-selector select, #level-selector button {
+            padding: 10px 15px;
+            border: 1px solid #d1d8e0;
+            border-radius: 6px;
+            background-color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #level-selector select:hover, #level-selector button:hover {
+            border-color: #a5b1c2;
+        }
+        #level-selector select:focus, #level-selector button:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        #next-problem {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+            font-weight: 500;
+            display: inline-flex; /* For icon alignment */
+            align-items: center;
+        }
+        #next-problem svg {
+            margin-left: 8px;
+        }
+        #next-problem:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        #equation-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        #reactants, #products {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            min-height: 200px;
+            flex-basis: 45%;
+            justify-content: center;
+            border: 1px solid #e9ecef; /* Subtle border */
+        }
+        .plus-separator {
+            font-size: 2em;
+            font-weight: 500;
+            color: #555;
+            padding: 0 10px;
+        }
+        .arrow-separator {
+            font-size: 2.5em;
+            color: #3498db;
+            font-weight: bold;
+            margin: 0 15px;
+        }
+        .molecule {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+            min-width: 120px;
+        }
+        .molecule svg {
+            margin-bottom: 5px;
+        }
+        .molecule-formula {
+            font-weight: 500;
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .molecule input[type="number"] {
+            width: 65px;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1.1em;
+            text-align: center;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .molecule input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        #atom-counts {
+            margin-top: 30px;
+        }
+        #atom-counts table {
+            width: 70%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #atom-counts th, #atom-counts td {
+            border: 1px solid #e9ecef;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        #atom-counts th {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: 500;
+        }
+        #atom-counts tr:nth-child(even) td {
+            background-color: #f8f9fa;
+        }
+        #atom-counts td:first-child {
+            font-weight: 500;
+            color: #2c3e50;
+            text-align: left;
+        }
+        #feedback {
+            margin-top: 30px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 1.15em;
+            border: 1px solid transparent;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            display: flex; /* For icon alignment */
+            align-items: center;
+            justify-content: center;
+        }
+        #feedback svg {
+            margin-right: 10px;
+            flex-shrink: 0; /* Prevent icon from shrinking */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="#3498db">
+                <path d="M19.746 10.072C19.909 9.404 20 8.707 20 8c0-2.095-.81-3.982-2.121-5.379A7.922 7.922 0 0 0 12.215 2h-.43C6.272 2 2 6.272 2 11.785c0 1.529.359 2.972.992 4.265L8 22.328V22a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-.328l5.008-6.278A8.383 8.383 0 0 0 19.746 10.072zM12 4.04A5.96 5.96 0 0 1 17.96 10H6.04A5.96 5.96 0 0 1 12 4.04zM14 20h-4v-1.517l-4-5A6.002 6.002 0 0 1 4 11.785C4 7.381 7.381 4 11.785 4h.43C16.619 4 20 7.381 20 11.785A6.002 6.002 0 0 1 18 13.483l-4 5V20z"/>
+                <path d="M12 12c-1.103 0-2 .897-2 2s.897 2 2 2 2-.897 2-2-.897-2-2-2zm0 2.5c-.275 0-.5-.225-.5-.5s.225-.5.5-.5.5.225.5.5-.225.5-.5.5z" fill-opacity=".5"/>
+            </svg>
+            Balance the Equation!
+        </h1>
+        <div id="level-selector">
+            <select id="level-dropdown" aria-label="Select Difficulty Level"></select>
+            <select id="equation-dropdown" aria-label="Select Equation"></select>
+            <button id="next-problem">
+                Next Problem
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="equation-display">
+            <div id="reactants"></div>
+            <span class="arrow-separator">→</span>
+            <div id="products"></div>
+        </div>
+        <div id="atom-counts">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Reactants</th>
+                        <th>Products</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        // SVG Icons for feedback
+        const successIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"></path></svg>`;
+        const failureIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L14.8284 7.75736L16.2426 9.17157L13.4142 12L16.2426 14.8284L14.8284 16.2426L12 13.4142L9.17157 16.2426L7.75736 14.8284L10.5858 12L7.75736 9.17157L9.17157 7.75736L12 10.5858Z"></path></svg>`;
+
+        const colorToElement = {
+            "blue": "H", "red": "O", "green": "N", "black": "C", "gray": "Na",
+            "yellow": "Cl", "silver": "Al", "brown": "Br", "orange": "Fe",
+            "purple": "Zn", "pink": "K", "teal": "Mg"
+        };
+
+        function processSVG(svgString, scale = 1.5) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgString, "image/svg+xml");
+            const svg = doc.querySelector("svg");
+            if (!svg) return svgString;
+
+            const originalWidth = parseFloat(svg.getAttribute("width")) || 50;
+            const originalHeight = parseFloat(svg.getAttribute("height")) || 50;
+            
+            svg.setAttribute("viewBox", `0 0 ${originalWidth} ${originalHeight}`);
+            svg.setAttribute("width", originalWidth * scale);
+            svg.setAttribute("height", originalHeight * scale);
+
+            const circles = svg.querySelectorAll("circle");
+            circles.forEach(circle => {
+                const cx = parseFloat(circle.getAttribute("cx"));
+                const cy = parseFloat(circle.getAttribute("cy"));
+                const r = parseFloat(circle.getAttribute("r"));
+                const fill = circle.getAttribute("fill");
+                const element = colorToElement[fill.toLowerCase()];
+
+                if (element) {
+                    const text = doc.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.setAttribute("x", cx);
+                    text.setAttribute("y", cy);
+                    text.setAttribute("text-anchor", "middle");
+                    text.setAttribute("dominant-baseline", "central");
+                    text.setAttribute("font-size", Math.max(8, r * 0.9));
+                    text.setAttribute("font-family", "Roboto, Arial, sans-serif");
+                    text.setAttribute("fill", "white");
+                    text.setAttribute("stroke", "rgba(0,0,0,0.6)");
+                    text.setAttribute("stroke-width", "0.4px");
+                    text.setAttribute("paint-order", "stroke fill");
+                    text.textContent = element;
+                    svg.appendChild(text);
+                }
+            });
+            return new XMLSerializer().serializeToString(doc);
+        }
+
+        const molecules = {
+            "H2": { formula: "H₂", elements: { H: 2 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="10" fill="blue" /><circle cx="35" cy="25" r="10" fill="blue" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>` },
+            "O2": { formula: "O₂", elements: { O: 2 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="10" fill="red" /><circle cx="35" cy="25" r="10" fill="red" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /><line x1="15" y1="20" x2="35" y2="20" stroke="black" /></svg>` },
+            "H2O": { formula: "H₂O", elements: { H: 2, O: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="15" r="10" fill="red" /><circle cx="15" cy="35" r="8" fill="blue" /><circle cx="35" cy="35" r="8" fill="blue" /><line x1="25" y1="15" x2="15" y2="35" stroke="black" /><line x1="25" y1="15" x2="35" y2="35" stroke="black" /></svg>` },
+            "N2": { formula: "N₂", elements: { N: 2 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="10" fill="green" /><circle cx="35" cy="25" r="10" fill="green" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /><line x1="15" y1="20" x2="35" y2="20" stroke="black" /><line x1="15" y1="30" x2="35" y2="30" stroke="black" /></svg>` },
+            "NH3": { formula: "NH₃", elements: { N: 1, H: 3 }, svg: `<svg width="50" height="50"><circle cx="25" cy="15" r="10" fill="green" /><circle cx="15" cy="35" r="8" fill="blue" /><circle cx="25" cy="35" r="8" fill="blue" /><circle cx="35" cy="35" r="8" fill="blue" /><line x1="25" y1="15" x2="15" y2="35" stroke="black" /><line x1="25" y1="15" x2="25" y2="35" stroke="black" /><line x1="25" y1="15" x2="35" y2="35" stroke="black" /></svg>` },
+            "CH4": { formula: "CH₄", elements: { C: 1, H: 4 }, svg: `<svg width="60" height="60"><circle cx="30" cy="30" r="12" fill="black" /><circle cx="15" cy="15" r="8" fill="blue" /><circle cx="45" cy="15" r="8" fill="blue" /><circle cx="15" cy="45" r="8" fill="blue" /><circle cx="45" cy="45" r="8" fill="blue" /><line x1="30" y1="30" x2="15" y2="15" stroke="black" /><line x1="30" y1="30" x2="45" y2="15" stroke="black" /><line x1="30" y1="30" x2="15" y2="45" stroke="black" /><line x1="30" y1="30" x2="45" y2="45" stroke="black" /></svg>` },
+            "CO2": { formula: "CO₂", elements: { C: 1, O: 2 }, svg: `<svg width="70" height="50"><circle cx="35" cy="25" r="12" fill="black" /><circle cx="15" cy="25" r="10" fill="red" /><circle cx="55" cy="25" r="10" fill="red" /><line x1="25" y1="25" x2="35" y2="25" stroke="black" /><line x1="25" y1="20" x2="35" y2="20" stroke="black" /><line x1="45" y1="25" x2="55" y2="25" stroke="black" /><line x1="45" y1="20" x2="55" y2="20" stroke="black" /></svg>` },
+            "Na": { formula: "Na", elements: { Na: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="12" fill="gray" /></svg>` },
+            "Cl2": { formula: "Cl₂", elements: { Cl: 2 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="10" fill="yellow" /><circle cx="35" cy="25" r="10" fill="yellow" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>` },
+            "NaCl": { formula: "NaCl", elements: { Na: 1, Cl: 1 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="12" fill="gray" /><circle cx="35" cy="25" r="10" fill="yellow" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>` },
+            "Al": { formula: "Al", elements: { Al: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="12" fill="silver" /></svg>` },
+            "Br2": { formula: "Br₂", elements: { Br: 2 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="11" fill="brown" /><circle cx="35" cy="25" r="11" fill="brown" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>` },
+            "AlBr3": { formula: "AlBr₃", elements: { Al: 1, Br: 3 }, svg: `<svg width="60" height="60"><circle cx="30" cy="20" r="12" fill="silver" /><circle cx="15" cy="40" r="11" fill="brown" /><circle cx="30" cy="40" r="11" fill="brown" /><circle cx="45" cy="40" r="11" fill="brown" /><line x1="30" y1="20" x2="15" y2="40" stroke="black" /><line x1="30" y1="20" x2="30" y2="40" stroke="black" /><line x1="30" y1="20" x2="45" y2="40" stroke="black" /></svg>` },
+            "Fe": { formula: "Fe", elements: { Fe: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="12" fill="orange" /></svg>` },
+            "Fe2O3": { formula: "Fe₂O₃", elements: { Fe: 2, O: 3 }, svg: `<svg width="70" height="70"><circle cx="25" cy="25" r="12" fill="orange" /><circle cx="45" cy="25" r="12" fill="orange" /><circle cx="15" cy="45" r="10" fill="red" /><circle cx="35" cy="45" r="10" fill="red" /><circle cx="55" cy="45" r="10" fill="red" /><line x1="25" y1="25" x2="15" y2="45" stroke="black" /><line x1="25" y1="25" x2="35" y2="45" stroke="black" /><line x1="45" y1="25" x2="35" y2="45" stroke="black" /><line x1="45" y1="25" x2="55" y2="45" stroke="black" /></svg>` },
+            "C3H8": { formula: "C₃H₈", elements: { C: 3, H: 8 }, svg: `<svg width="80" height="60"><circle cx="20" cy="30" r="10" fill="black" /><circle cx="40" cy="30" r="10" fill="black" /><circle cx="60" cy="30" r="10" fill="black" /><circle cx="10" cy="15" r="7" fill="blue" /><circle cx="30" cy="15" r="7" fill="blue" /><circle cx="50" cy="15" r="7" fill="blue" /><circle cx="70" cy="15" r="7" fill="blue" /><circle cx="10" cy="45" r="7" fill="blue" /><circle cx="30" cy="45" r="7" fill="blue" /><circle cx="50" cy="45" r="7" fill="blue" /><circle cx="70" cy="45" r="7" fill="blue" /><line x1="20" y1="30" x2="40" y2="30" stroke="black" /><line x1="40" y1="30" x2="60" y2="30" stroke="black" /><line x1="20" y1="30" x2="10" y2="15" stroke="black" /><line x1="20" y1="30" x2="30" y2="15" stroke="black" /><line x1="40" y1="30" x2="50" y2="15" stroke="black" /><line x1="60" y1="30" x2="70" y2="15" stroke="black" /><line x1="20" y1="30" x2="10" y2="45" stroke="black" /><line x1="20" y1="30" x2="30" y2="45" stroke="black" /><line x1="40" y1="30" x2="50" y2="45" stroke="black" /><line x1="60" y1="30" x2="70" y2="45" stroke="black" /></svg>` },
+            "Zn": { formula: "Zn", elements: { Zn: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="12" fill="purple" /></svg>` },
+            "HCl": { formula: "HCl", elements: { H: 1, Cl: 1 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="8" fill="blue" /><circle cx="35" cy="25" r="10" fill="yellow" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>` },
+            "ZnCl2": { formula: "ZnCl₂", elements: { Zn: 1, Cl: 2 }, svg: `<svg width="60" height="50"><circle cx="30" cy="25" r="12" fill="purple" /><circle cx="10" cy="25" r="10" fill="yellow" /><circle cx="50" cy="25" r="10" fill="yellow" /><line x1="10" y1="25" x2="30" y2="25" stroke="black" /><line x1="30" y1="25" x2="50" y2="25" stroke="black" /></svg>` },
+            "K": { formula: "K", elements: { K: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="13" fill="pink" /></svg>` },
+            "KOH": { formula: "KOH", elements: { K: 1, O: 1, H: 1 }, svg: `<svg width="70" height="50"><circle cx="15" cy="25" r="13" fill="pink" /><circle cx="35" cy="25" r="10" fill="red" /><circle cx="55" cy="25" r="8" fill="blue" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /><line x1="35" y1="25" x2="55" y2="25" stroke="black" /></svg>` },
+            "Mg": { formula: "Mg", elements: { Mg: 1 }, svg: `<svg width="50" height="50"><circle cx="25" cy="25" r="12" fill="teal" /></svg>` },
+            "Mg3N2": { formula: "Mg₃N₂", elements: { Mg: 3, N: 2 }, svg: `<svg width="70" height="70"><circle cx="25" cy="25" r="12" fill="teal" /><circle cx="45" cy="25" r="12" fill="teal" /><circle cx="35" cy="45" r="12" fill="teal" /><circle cx="15" cy="45" r="10" fill="green" /><circle cx="55" cy="45" r="10" fill="green" /><line x1="25" y1="25" x2="15" y2="45" stroke="black" /><line x1="25" y1="25" x2="35" y2="45" stroke="black" /><line x1="45" y1="25" x2="55" y2="45" stroke="black" /><line x1="45" y1="25" x2="35" y2="45" stroke="black" /><line x1="15" y1="45" x2="35" y2="45" stroke="black" /><line x1="55" y1="45" x2="35" y2="45" stroke="black" /></svg>` },
+            "CO": { formula: "CO", elements: { C: 1, O: 1 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="10" fill="black" /><circle cx="35" cy="25" r="10" fill="red" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /><line x1="15" y1="20" x2="35" y2="20" stroke="black" /></svg>` },
+            "C6H12O6": { formula: "C₆H₁₂O₆", elements: { C: 6, H: 12, O: 6 }, svg: `<svg width="100" height="100"><text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="12">Complex (C₆H₁₂O₆)</text><circle cx="50" cy="50" r="15" fill="lightgray" opacity="0.5"/><circle cx="50" cy="50" r="12" fill="black" /></svg>` },
+            "KCl": { formula: "KCl", elements: { K: 1, Cl: 1 }, svg: `<svg width="50" height="50"><circle cx="15" cy="25" r="13" fill="pink" /><circle cx="35" cy="25" r="10" fill="yellow" /><line x1="15" y1="25" x2="35" y2="25" stroke="black" /></svg>`}
+        };
+
+        for (const mol in molecules) {
+            molecules[mol].svg = processSVG(molecules[mol].svg);
+        }
+
+        const levels = [
+            { name: "Level 1 (Easy)", equations: [
+                    { reactants: ["H2", "O2"], products: ["H2O"] }, { reactants: ["N2", "H2"], products: ["NH3"] },
+                    { reactants: ["CH4", "O2"], products: ["CO2", "H2O"] }, { reactants: ["Na", "Cl2"], products: ["NaCl"] },
+                    { reactants: ["Al", "Br2"], products: ["AlBr3"] }
+            ]},
+            { name: "Level 2 (Moderate)", equations: [
+                    { reactants: ["Fe", "O2"], products: ["Fe2O3"] }, { reactants: ["C3H8", "O2"], products: ["CO2", "H2O"] },
+                    { reactants: ["Zn", "HCl"], products: ["ZnCl2", "H2"] }, { reactants: ["K", "H2O"], products: ["KOH", "H2"] },
+                    { reactants: ["Mg", "N2"], products: ["Mg3N2"] }
+            ]},
+            { name: "Level 3 (Complex)", equations: [
+                    { reactants: ["Fe2O3", "CO"], products: ["Fe", "CO2"] },
+                    { reactants: ["CH4", "Cl2"], products: ["HCl", "CO"] }, 
+                    { reactants: ["C6H12O6", "O2"], products: ["CO2", "H2O"] },
+                    { reactants: ["Fe2O3", "H2"], products: ["Fe", "H2O"] },
+                    { reactants: ["KOH", "HCl"], products: ["KCl", "H2O"] }
+            ]}
+        ];
+
+        function renderEquation(equation) {
+            const reactantsDiv = document.getElementById("reactants");
+            const productsDiv = document.getElementById("products");
+            reactantsDiv.innerHTML = "";
+            productsDiv.innerHTML = "";
+
+            equation.reactants.forEach((molKey, index) => {
+                if (index > 0) {
+                    const plusSpan = document.createElement('span');
+                    plusSpan.textContent = '+';
+                    plusSpan.className = 'plus-separator';
+                    reactantsDiv.appendChild(plusSpan);
+                }
+                const molData = molecules[molKey];
+                if (!molData) { console.error(`Molecule ${molKey} not found!`); return; }
+
+                const molDiv = document.createElement("div");
+                molDiv.className = "molecule";
+                molDiv.innerHTML = molData.svg;
+                
+                const formulaP = document.createElement("p");
+                formulaP.className = "molecule-formula";
+                formulaP.innerHTML = molData.formula;
+                molDiv.appendChild(formulaP);
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.min = "1";
+                input.value = "1";
+                input.dataset.molecule = molKey;
+                input.setAttribute("aria-label", `Coefficient for ${molData.formula}`);
+                input.addEventListener("input", updateAtomCounts);
+                molDiv.appendChild(input);
+                reactantsDiv.appendChild(molDiv);
+            });
+
+            equation.products.forEach((molKey, index) => {
+                if (index > 0) {
+                    const plusSpan = document.createElement('span');
+                    plusSpan.textContent = '+';
+                    plusSpan.className = 'plus-separator';
+                    productsDiv.appendChild(plusSpan);
+                }
+                const molData = molecules[molKey];
+                if (!molData) { console.error(`Molecule ${molKey} not found!`); return; }
+
+                const molDiv = document.createElement("div");
+                molDiv.className = "molecule";
+                molDiv.innerHTML = molData.svg;
+
+                const formulaP = document.createElement("p");
+                formulaP.className = "molecule-formula";
+                formulaP.innerHTML = molData.formula;
+                molDiv.appendChild(formulaP);
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.min = "1";
+                input.value = "1";
+                input.dataset.molecule = molKey;
+                input.setAttribute("aria-label", `Coefficient for ${molData.formula}`);
+                input.addEventListener("input", updateAtomCounts);
+                molDiv.appendChild(input);
+                productsDiv.appendChild(molDiv);
+            });
+
+            const allElements = new Set();
+            equation.reactants.forEach(mol => Object.keys(molecules[mol].elements).forEach(el => allElements.add(el)));
+            equation.products.forEach(mol => Object.keys(molecules[mol].elements).forEach(el => allElements.add(el)));
+            
+            window.currentEquationElements = Array.from(allElements); 
+            renderAtomCountsTable(window.currentEquationElements);
+            updateAtomCounts();
+        }
+
+        function renderAtomCountsTable(elements) {
+            const tbody = document.querySelector("#atom-counts tbody");
+            tbody.innerHTML = "";
+            if (!elements || elements.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 3;
+                cell.textContent = "Select an equation to see atom counts.";
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+            elements.forEach(el => {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${el}</td><td class="reactants-count">0</td><td class="products-count">0</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateAtomCounts() {
+            const reactantsInputs = document.querySelectorAll("#reactants input");
+            const productsInputs = document.querySelectorAll("#products input");
+            const reactantsCounts = {};
+            const productsCounts = {};
+
+            reactantsInputs.forEach(input => {
+                const molKey = input.dataset.molecule;
+                let coeff = parseInt(input.value);
+                if (isNaN(coeff) || coeff <= 0) { // If empty, NaN, or non-positive, treat as 0 for calculation, but visually might be 1 or empty
+                    coeff = 0; 
+                    if (input.value !== "" && parseInt(input.value) <=0) input.value = "1"; // Auto-correct negatives/zero to 1
+                }
+                const molData = molecules[molKey];
+                if(molData) {
+                    for (let el in molData.elements) {
+                        reactantsCounts[el] = (reactantsCounts[el] || 0) + coeff * molData.elements[el];
+                    }
+                }
+            });
+
+            productsInputs.forEach(input => {
+                const molKey = input.dataset.molecule;
+                let coeff = parseInt(input.value);
+                 if (isNaN(coeff) || coeff <= 0) {
+                    coeff = 0;
+                    if (input.value !== "" && parseInt(input.value) <=0) input.value = "1";
+                }
+                const molData = molecules[molKey];
+                 if(molData) {
+                    for (let el in molData.elements) {
+                        productsCounts[el] = (productsCounts[el] || 0) + coeff * molData.elements[el];
+                    }
+                }
+            });
+
+            const rows = document.querySelectorAll("#atom-counts tbody tr");
+            let allBalanced = true;
+            
+            if (!window.currentEquationElements || window.currentEquationElements.length === 0) {
+                allBalanced = false;
+            } else {
+                window.currentEquationElements.forEach(el => {
+                    const reactantCount = reactantsCounts[el] || 0;
+                    const productCount = productsCounts[el] || 0;
+                    let rowFound = false;
+                    rows.forEach(row => {
+                        if (row.cells[0].textContent === el) {
+                            row.cells[1].textContent = reactantCount;
+                            row.cells[2].textContent = productCount;
+                            const countsEqual = reactantCount === productCount;
+                            const color = countsEqual ? "#2ecc71" : "#e74c3c";
+                            row.cells[1].style.color = color;
+                            row.cells[1].style.fontWeight = 'bold';
+                            row.cells[2].style.color = color;
+                            row.cells[2].style.fontWeight = 'bold';
+                            if (!countsEqual) allBalanced = false;
+                            rowFound = true;
+                        }
+                    });
+                    if (!rowFound) allBalanced = false;
+                });
+            }
+           
+            const feedbackDiv = document.getElementById("feedback");
+            if (allBalanced) {
+                const allInputs = [...reactantsInputs, ...productsInputs];
+                if (allInputs.some(input => (parseInt(input.value) || 0) === 0)) {
+                    allBalanced = false; // Not truly balanced if any coefficient is zero or not a positive number
+                }
+            }
+            if(window.currentEquationElements && window.currentEquationElements.length === 0) {
+                allBalanced = false;
+            }
+
+            if (allBalanced) {
+                feedbackDiv.innerHTML = `${successIconSVG} The equation is balanced! Well done!`;
+                feedbackDiv.style.backgroundColor = "#d4edda";
+                feedbackDiv.style.color = "#155724";
+                feedbackDiv.style.borderColor = "#c3e6cb";
+            } else {
+                feedbackDiv.innerHTML = `${failureIconSVG} The equation is not balanced. Keep trying!`;
+                feedbackDiv.style.backgroundColor = "#f8d7da";
+                feedbackDiv.style.color = "#721c24";
+                feedbackDiv.style.borderColor = "#f5c6cb";
+            }
+        }
+
+        const levelDropdown = document.getElementById("level-dropdown");
+        const equationDropdown = document.getElementById("equation-dropdown");
+        const nextProblemButton = document.getElementById("next-problem");
+
+        function populateLevelDropdown() {
+            levels.forEach((level, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = level.name;
+                levelDropdown.appendChild(option);
+            });
+        }
+
+        function populateEquationDropdown(levelIndex) {
+            const equations = levels[levelIndex].equations;
+            equationDropdown.innerHTML = "";
+            equations.forEach((eq, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                const reactantFormulas = eq.reactants.map(r => molecules[r] ? molecules[r].formula : r).join(" + ");
+                const productFormulas = eq.products.map(p => molecules[p] ? molecules[p].formula : p).join(" + ");
+                option.textContent = `Eq ${index + 1}: ${reactantFormulas.replace(/<[^>]*>/g, "")} → ${productFormulas.replace(/<[^>]*>/g, "")}`; // Strip HTML for textContent
+                option.title = `${reactantFormulas.replace(/<[^>]*>/g, "")} → ${productFormulas.replace(/<[^>]*>/g, "")}`;
+                equationDropdown.appendChild(option);
+            });
+        }
+
+        levelDropdown.addEventListener("change", () => {
+            const levelIndex = parseInt(levelDropdown.value);
+            populateEquationDropdown(levelIndex);
+            equationDropdown.value = "0";
+            equationDropdown.dispatchEvent(new Event("change"));
+        });
+
+        equationDropdown.addEventListener("change", () => {
+            const levelIndex = parseInt(levelDropdown.value);
+            const equationIndex = parseInt(equationDropdown.value);
+            if (isNaN(levelIndex) || isNaN(equationIndex)) return; 
+
+            const equation = levels[levelIndex].equations[equationIndex];
+            renderEquation(equation);
+        });
+
+        nextProblemButton.addEventListener("click", () => {
+            const currentLevelIndex = parseInt(levelDropdown.value);
+            const currentEquationIndex = parseInt(equationDropdown.value);
+            const numEquationsInLevel = levels[currentLevelIndex].equations.length;
+            let nextEquationIndex = (currentEquationIndex + 1) % numEquationsInLevel;
+            equationDropdown.value = nextEquationIndex;
+            equationDropdown.dispatchEvent(new Event("change"));
+        });
+
+        // Initialize
+        populateLevelDropdown();
+        levelDropdown.value = "0";
+        levelDropdown.dispatchEvent(new Event("change"));
+    </script>
+</body>
+</html>
